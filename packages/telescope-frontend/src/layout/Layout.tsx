@@ -36,34 +36,28 @@ const LayoutComponent = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   useEffect(() => {
-    const newSocket = io('http://localhost:8000/telescope', {
-      transports: ['websocket'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+    const newSocket = io('http://localhost:4000', {
+      path: '/telescope/socket.io',
+      transports: ['websocket', 'polling'],
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('Connected to Telescope');
       message.success('Connected to Telescope server');
     });
 
     newSocket.on('connect_error', error => {
-      console.error('Socket connection error:', error);
-      message.error('Failed to connect to Telescope server');
-    });
-
-    newSocket.on('disconnect', reason => {
-      console.log('Socket disconnected:', reason);
-      message.warning('Disconnected from Telescope server');
+      console.error('Connection error:', error);
+      message.error(`Failed to connect to Telescope server: ${error.message}`);
     });
 
     setSocket(newSocket);
 
     return () => {
+      console.log('Closing socket connection');
       newSocket.close();
     };
   }, []);
-
   return (
     <Flex gap="middle" wrap>
       <Layout style={{ height: '100vh' }}>

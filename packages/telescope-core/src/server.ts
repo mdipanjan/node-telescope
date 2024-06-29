@@ -5,6 +5,8 @@ import { Telescope } from './core/telescope';
 import { MongoStorage } from './storage/mongo-storage';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import { Server as HttpServer } from 'http';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -16,12 +18,14 @@ interface IUser extends Document {
 
 class TestServer {
   private app: Express;
+  private server: HttpServer;
   private telescope!: Telescope;
   private storage!: MongoStorage;
   private User: mongoose.Model<IUser>;
 
   constructor() {
     this.app = express();
+    this.server = new HttpServer(this.app);
     this.configureMiddleware();
     this.configureMongoose();
     this.configureTelescope();
@@ -32,6 +36,14 @@ class TestServer {
   private configureMiddleware(): void {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
+    // Apply CORS to all routes
+    this.app.use(
+      cors({
+        origin: 'http://localhost:3000', // Your React app URL
+        // methods: ['GET', 'POST'],
+        credentials: true,
+      }),
+    );
   }
 
   private configureMongoose(): void {
@@ -62,15 +74,17 @@ class TestServer {
     this.telescope = new Telescope({
       storage: this.storage,
       watchedEntries: ['requests', 'logs', 'errors'],
-      port: 8000,
       routePrefix: '/telescope',
       corsOptions: {
         origin: 'http://localhost:3000', // React local url
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type', 'Authorization'],
       },
+      app: this.app, // Provide the Express app
+      server: this.server, // Provide the HTTP server
     });
 
+    this.telescope.setupWithExpress(this.app, this.server);
     this.app.use(this.telescope.middleware());
   }
 
@@ -116,13 +130,13 @@ class TestServer {
   public async start(): Promise<void> {
     try {
       await this.storage.connect();
-      const PORT = process.env.PORT || 4000;
-      this.app.listen(PORT, () => {
+      await this.telescope.connect();
+      const PORT = process.env.TEST_SERVER_PORT || 4000;
+      const TELESCOPE_PORT = process.env.TELESCOPE_PORT || 4000;
+      this.server.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
-        console.log(`Telescope is available at http://localhost:8000/telescope`);
+        console.log(`Telescope is available at http://localhost:${TELESCOPE_PORT}/telescope`);
       });
-
-      this.telescope.listen();
 
       this.setupGracefulShutdown();
     } catch (error) {
