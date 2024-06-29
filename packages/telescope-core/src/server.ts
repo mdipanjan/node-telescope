@@ -62,8 +62,13 @@ class TestServer {
     this.telescope = new Telescope({
       storage: this.storage,
       watchedEntries: ['requests', 'logs', 'errors'],
-      port: 3000,
+      port: 8000,
       routePrefix: '/telescope',
+      corsOptions: {
+        origin: 'http://localhost:3000', // React local url
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      },
     });
 
     this.app.use(this.telescope.middleware());
@@ -114,7 +119,7 @@ class TestServer {
       const PORT = process.env.PORT || 4000;
       this.app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
-        console.log(`Telescope is available at http://localhost:3000/telescope`);
+        console.log(`Telescope is available at http://localhost:8000/telescope`);
       });
 
       this.telescope.listen();

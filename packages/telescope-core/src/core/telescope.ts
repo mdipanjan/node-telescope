@@ -4,12 +4,14 @@ import { Server as SocketServer, Socket } from 'socket.io';
 import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
+import cors from 'cors';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
   watchedEntries: string[];
   port: number;
   routePrefix: string;
+  corsOptions?: Record<string, unknown>;
 }
 
 export class Telescope {
@@ -22,8 +24,9 @@ export class Telescope {
     this.options = {
       storage: options.storage!,
       watchedEntries: options.watchedEntries || ['requests', 'logs', 'errors'],
-      port: options.port || 3000,
+      port: options.port || 8000,
       routePrefix: options.routePrefix || '/telescope',
+      corsOptions: options.corsOptions || {},
     };
 
     if (!this.options.storage) {
@@ -33,10 +36,15 @@ export class Telescope {
     this.storage = this.options.storage;
     this.app = express();
     this.server = new HttpServer(this.app);
-    this.io = new SocketServer(this.server);
+    this.io = new SocketServer(this.server, {
+      cors: this.options.corsOptions,
+    });
+    this.setupExpress();
+    this.setupSocketIO();
   }
 
   private setupExpress(): void {
+    this.app.use(cors(this.options.corsOptions));
     this.app.use(this.options.routePrefix, express.static('public'));
     this.app.get(`${this.options.routePrefix}/api/entries`, this.getEntries.bind(this));
     this.app.get(`${this.options.routePrefix}/api/entries/:id`, this.getEntry.bind(this));
