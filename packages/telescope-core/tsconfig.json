@@ -5,12 +5,12 @@
     "lib": ["es2018"],
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "packages/telescope-core/src",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["packages/telescope-core/src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
