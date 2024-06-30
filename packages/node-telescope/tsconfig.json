@@ -2,15 +2,15 @@
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
-    "lib": ["es2018"],
+    "lib": ["es2018", "esnext.asynciterable"],
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "packages/telescope-core/src",
-    "strict": false,
+    "rootDir": "./src",
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["packages/telescope-core/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

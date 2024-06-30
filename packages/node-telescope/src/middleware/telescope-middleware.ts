@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Telescope } from '../core/telescope';
+import { Entry } from '../storage/storage-interface';
 
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -12,15 +13,17 @@ export function telescopeMiddleware(telescope: Telescope) {
     const originalEnd = res.end;
 
     res.write = function (
+      this: Response,
       chunk: any,
-      encoding?: BufferEncoding | ((error: Error) => void),
-      cb?: (error: Error) => void,
+      encoding?: BufferEncoding | ((error: Error | null) => void),
+      cb?: (error: Error | null) => void,
     ): boolean {
       chunks.push(Buffer.from(chunk));
       return originalWrite.apply(this, arguments as any);
-    } as Response['write'];
+    };
 
     res.end = function (
+      this: Response,
       chunk?: any,
       encoding?: BufferEncoding | (() => void),
       cb?: () => void,
@@ -31,19 +34,28 @@ export function telescopeMiddleware(telescope: Telescope) {
       const responseBody = Buffer.concat(chunks).toString('utf8');
       const responseTime = Date.now() - startTime;
 
-      const entry = {
-        id: entryId,
+      const entry: Omit<Entry, 'id'> = {
         type: 'http',
         request: {
           method: req.method,
           url: req.url,
-          ip: req.ip,
-          headers: req.headers,
+          ip: req.ip || 'unknown',
+          headers: Object.fromEntries(
+            Object.entries(req.headers).map(([key, value]) => [
+              key,
+              Array.isArray(value) ? value.join(', ') : value || '',
+            ]),
+          ),
           body: req.body,
         },
         response: {
           statusCode: res.statusCode,
-          headers: res.getHeaders(),
+          headers: Object.fromEntries(
+            Object.entries(res.getHeaders()).map(([key, value]) => [
+              key,
+              Array.isArray(value) ? value.join(', ') : value?.toString() || '',
+            ]),
+          ),
           body: responseBody.substring(0, 1000), // Limit response body size
         },
         duration: responseTime,
@@ -51,11 +63,11 @@ export function telescopeMiddleware(telescope: Telescope) {
       };
 
       if (telescope.options.watchedEntries.includes('requests')) {
-        telescope.storage.storeEntry(entry as any);
+        telescope.storage.storeEntry(entry);
       }
 
       return originalEnd.apply(this, arguments as any);
-    } as Response['end'];
+    };
 
     next();
   };

@@ -2,8 +2,12 @@
 node_modules/
 
 # Build outputs
-dist/
+ dist/
+*.js
+*.d.ts
 build/
+
+
 
 # Logs
 logs
@@ -106,3 +110,4 @@ Thumbs.db
 
 # Lerna
 lerna-debug.log
+

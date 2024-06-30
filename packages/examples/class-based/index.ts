@@ -1,8 +1,7 @@
 // This is a test server to test the Telescope library
 import express, { Express, Request, Response, NextFunction } from 'express';
 import mongoose, { Schema, Document } from 'mongoose';
-import { Telescope } from './core/telescope';
-import { MongoStorage } from './storage/mongo-storage';
+import telescope, { Telescope, MongoStorage } from 'node-telescope';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { Server as HttpServer } from 'http';
@@ -21,7 +20,7 @@ class TestServer {
   private server: HttpServer;
   private telescope!: Telescope;
   private storage!: MongoStorage;
-  private User: mongoose.Model<IUser>;
+  private User!: mongoose.Model<IUser>;
 
   constructor() {
     this.app = express();
@@ -40,7 +39,6 @@ class TestServer {
     this.app.use(
       cors({
         origin: 'http://localhost:3000', // Your React app URL
-        // methods: ['GET', 'POST'],
         credentials: true,
       }),
     );
@@ -132,10 +130,9 @@ class TestServer {
       await this.storage.connect();
       await this.telescope.connect();
       const PORT = process.env.TEST_SERVER_PORT || 4000;
-      const TELESCOPE_PORT = process.env.TELESCOPE_PORT || 4000;
       this.server.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
-        console.log(`Telescope is available at http://localhost:${TELESCOPE_PORT}/telescope`);
+        console.log(`Telescope is available at http://localhost:${PORT}/telescope`);
       });
 
       this.setupGracefulShutdown();
