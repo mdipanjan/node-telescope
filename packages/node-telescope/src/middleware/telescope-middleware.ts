@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Telescope } from '../core/telescope';
 import { Entry } from '../storage/storage-interface';
+import { EntryType } from '../types';
 
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -35,7 +36,7 @@ export function telescopeMiddleware(telescope: Telescope) {
       const responseTime = Date.now() - startTime;
 
       const entry: Omit<Entry, 'id'> = {
-        type: 'http',
+        type: EntryType.REQUESTS,
         request: {
           method: req.method,
           url: req.url,
@@ -61,8 +62,7 @@ export function telescopeMiddleware(telescope: Telescope) {
         duration: responseTime,
         timestamp: new Date(),
       };
-
-      if (telescope.options.watchedEntries.includes('requests')) {
+      if (telescope.options.watchedEntries.includes(EntryType.REQUESTS)) {
         telescope.storage.storeEntry(entry);
       }
 

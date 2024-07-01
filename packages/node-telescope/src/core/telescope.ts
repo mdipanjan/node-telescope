@@ -5,6 +5,7 @@ import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
+import { EntryType } from '../types';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -22,7 +23,11 @@ export class Telescope {
   constructor(options: TelescopeOptions) {
     this.options = {
       storage: options.storage!,
-      watchedEntries: options.watchedEntries || ['requests', 'logs', 'errors'],
+      watchedEntries: options.watchedEntries || [
+        EntryType.REQUESTS,
+        EntryType.EXCEPTIONS,
+        EntryType.QUERIES,
+      ],
       routePrefix: options.routePrefix || '/telescope',
       corsOptions: options.corsOptions || {},
       app: options.app,

@@ -1,7 +1,7 @@
 // This is a test server to test the Telescope library
 import express, { Express, Request, Response, NextFunction } from 'express';
 import mongoose, { Schema, Document } from 'mongoose';
-import telescope, { Telescope, MongoStorage } from 'node-telescope';
+import telescope, { Telescope, MongoStorage, EntryType } from 'node-telescope';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { Server as HttpServer } from 'http';
@@ -71,7 +71,7 @@ class TestServer {
 
     this.telescope = new Telescope({
       storage: this.storage,
-      watchedEntries: ['requests', 'logs', 'errors'],
+      watchedEntries: [EntryType.REQUESTS],
       routePrefix: '/telescope',
       corsOptions: {
         origin: 'http://localhost:3000', // React local url
@@ -82,7 +82,6 @@ class TestServer {
       server: this.server, // Provide the HTTP server
     });
 
-    this.telescope.setupWithExpress(this.app, this.server);
     this.app.use(this.telescope.middleware());
   }
 
