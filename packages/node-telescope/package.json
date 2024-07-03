@@ -8,13 +8,18 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "clean": "rimraf dist && echo 'Cleaned dist folder'",
+    "prebuild": "echo 'Starting build process' && npm run clean",
+    "build": "echo 'Running TypeScript compiler' && tsc",
+    "postbuild": "echo 'Build process completed' && ls -la dist",
     "prepublishOnly": "npm run build",
     "test": "jest",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/**/*.ts'",
-    "lint:fix": "eslint 'src/**/*.ts' --fix"
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "watch": "npm run clean && tsc --watch",
+    "dev": "npm run watch"
   },
   "author": "mdipanjan",
   "license": "MIT",
@@ -49,6 +54,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
+    "rimraf": "^5.0.7",
     "ts-jest": "^26.5.6",
     "typescript": "^4.2.4"
   }

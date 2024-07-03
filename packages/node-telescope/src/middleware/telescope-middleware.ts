@@ -1,13 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { Telescope } from '../core/telescope';
-import { Entry } from '../storage/storage-interface';
-import { EntryType } from '../types';
+import { EntryType, RequestEntry } from '../types';
 
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
     const startTime = Date.now();
-    const entryId = uuidv4();
 
     const chunks: Buffer[] = [];
     const originalWrite = res.write;
@@ -35,8 +32,10 @@ export function telescopeMiddleware(telescope: Telescope) {
       const responseBody = Buffer.concat(chunks).toString('utf8');
       const responseTime = Date.now() - startTime;
 
-      const entry: Omit<Entry, 'id'> = {
+      const entry: Omit<RequestEntry, 'id'> = {
         type: EntryType.REQUESTS,
+        timestamp: new Date(),
+        duration: responseTime,
         request: {
           method: req.method,
           url: req.url,
@@ -59,9 +58,9 @@ export function telescopeMiddleware(telescope: Telescope) {
           ),
           body: responseBody.substring(0, 1000), // Limit response body size
         },
-        duration: responseTime,
-        timestamp: new Date(),
       };
+      console.log('Entry type being stored:', entry.type); // remove dev log later
+
       if (telescope.options.watchedEntries.includes(EntryType.REQUESTS)) {
         telescope.storage.storeEntry(entry);
       }

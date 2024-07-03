@@ -71,7 +71,8 @@ class TestServer {
 
     this.telescope = new Telescope({
       storage: this.storage,
-      watchedEntries: [EntryType.REQUESTS],
+      watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
+      enableQueryLogging: true,
       routePrefix: '/telescope',
       corsOptions: {
         origin: 'http://localhost:3000', // React local url
@@ -81,6 +82,7 @@ class TestServer {
       app: this.app, // Provide the Express app
       server: this.server, // Provide the HTTP server
     });
+    console.log('Telescope initialized with options:', this.telescope.options);
 
     this.app.use(this.telescope.middleware());
   }
@@ -89,11 +91,17 @@ class TestServer {
     this.app.get('/users', this.getUsers.bind(this));
     this.app.get('/', this.getHome.bind(this));
     this.app.post('/users', this.createUser.bind(this));
+    this.app.get('/error', this.triggerError.bind(this));
+
+  }
+
+  private async triggerError(req: Request, res: Response): Promise<void> {
+    throw new Error('This is a test error');
   }
 
   private async getHome(req: Request, res: Response): Promise<void> {
     try {
-      res.send('HELLO WORLD! This is the home page!');
+      res.send('HELLO WORLD! This is the home page!!!!');
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Failed to fetch users' });

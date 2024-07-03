@@ -11,10 +11,12 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "preserveSymlinks": true
+
   },
   "include": ["src/**/*"],
   "references": [
-    { "path": "../../packages/node-telescope" }
+    { "path": "../../node-telescope" }
   ]
 }

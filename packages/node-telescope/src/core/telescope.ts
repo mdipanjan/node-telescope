@@ -5,7 +5,8 @@ import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
-import { EntryType } from '../types';
+import { EntryType, ExceptionEntry } from '../types';
+import mongoose from 'mongoose';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -14,6 +15,7 @@ export interface TelescopeOptions {
   corsOptions?: Record<string, unknown>;
   app?: Express;
   server?: HttpServer;
+  enableQueryLogging?: boolean;
 }
 
 export class Telescope {
@@ -28,6 +30,7 @@ export class Telescope {
         EntryType.EXCEPTIONS,
         EntryType.QUERIES,
       ],
+      enableQueryLogging: options.enableQueryLogging ?? false,
       routePrefix: options.routePrefix || '/telescope',
       corsOptions: options.corsOptions || {},
       app: options.app,
@@ -43,23 +46,29 @@ export class Telescope {
     }
 
     this.storage = this.options.storage;
-    this.setupWithExpress(this.options.app, this.options.server);
+    this.setupWithExpress();
+    this.initialize();
   }
 
-  public setupWithExpress(app: Express, server: HttpServer): void {
-    app.use(cors(this.options.corsOptions));
-    app.use(this.options.routePrefix, express.static('public'));
+  public setupWithExpress(): void {
+    const { app, server, routePrefix, corsOptions } = this.options;
+    if (app && server) {
+      app.use(telescopeMiddleware(this));
 
-    if (!this.io) {
-      this.io = new SocketServer(server, {
-        path: `${this.options.routePrefix}/socket.io`,
-        cors: this.options.corsOptions,
-      });
+      app.use(cors(this.options.corsOptions));
+      app.use(this.options.routePrefix, express.static('public'));
 
-      this.setupSocketIO();
+      if (!this.io) {
+        this.io = new SocketServer(server, {
+          path: `${this.options.routePrefix}/socket.io`,
+          cors: this.options.corsOptions,
+        });
+
+        this.setupSocketIO();
+      }
+      app.get(`${this.options.routePrefix}/api/entries`, this.getEntries.bind(this));
+      app.get(`${this.options.routePrefix}/api/entries/:id`, this.getEntry.bind(this));
     }
-    app.get(`${this.options.routePrefix}/api/entries`, this.getEntries.bind(this));
-    app.get(`${this.options.routePrefix}/api/entries/:id`, this.getEntry.bind(this));
   }
 
   private setupSocketIO(): void {
@@ -80,6 +89,94 @@ export class Telescope {
     this.storage.on('newEntry', (entry: unknown) => {
       socket.emit('newEntry', entry);
     });
+  }
+
+  private initialize(): void {
+    if (this.options.enableQueryLogging) {
+      this.setupQueryLogging();
+    }
+
+    // Setup other features based on watchedEntries
+    if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
+      this.setupExceptionLogging();
+    }
+
+    // ... initialize other features.. Will update later
+  }
+
+  public logException(error: Error | unknown): void {
+    if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
+      const entry: Omit<ExceptionEntry, 'id'> = {
+        type: EntryType.EXCEPTIONS,
+        timestamp: new Date(),
+        exception: {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          class: error instanceof Error ? error.constructor.name : 'UnknownError',
+        },
+      };
+
+      console.log('Logging exception:', JSON.stringify(entry, null, 2));
+
+      this.storage
+        .storeEntry(entry)
+        .then(() => console.log('Exception entry stored successfully'))
+        .catch(storageError => {
+          console.error('Failed to store exception entry:', storageError);
+        });
+    }
+  }
+
+  private setupQueryLogging(): void {
+    if (this.options.watchedEntries.includes(EntryType.QUERIES)) {
+      const telescopeInstance = this;
+      mongoose.plugin(function (schema) {
+        ['find', 'findOne', 'findOneAndUpdate', 'updateOne', 'deleteOne'].forEach(method => {
+          // @ts-ignore: Adding custom property to the query
+          schema.pre(method, function (this: mongoose.Query<any, any>) {
+            const startTime = Date.now();
+            // @ts-ignore: Adding custom property to the query
+            this.queryStartTime = startTime;
+          });
+          // @ts-ignore: Adding custom property to the query
+          schema.post(method, function (this: mongoose.Query<any, any>, result: any) {
+            const endTime = Date.now();
+            // @ts-ignore: Accessing custom property from the query
+            const duration = endTime - (this.queryStartTime || endTime);
+
+            const entry = {
+              type: EntryType.QUERIES,
+              timestamp: new Date(),
+              data: {
+                method,
+                query: this.getQuery(),
+                collection: this.model.collection.name,
+                duration,
+              },
+            };
+            telescopeInstance.storage.storeEntry(entry as any); // remove any type later
+          });
+        });
+      });
+    }
+  }
+
+  private setupExceptionLogging(): void {
+    if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
+      process.on('uncaughtException', (error: Error) => {
+        console.log('HELLO 111');
+        this.logException(error);
+      });
+
+      process.on('unhandledRejection', (reason: any) => {
+        console.log('HELLO 222', reason);
+        if (reason instanceof Error) {
+          this.logException(reason);
+        } else {
+          this.logException(new Error(String(reason)));
+        }
+      });
+    }
   }
 
   private async getEntries(req: Request, res: Response): Promise<void> {

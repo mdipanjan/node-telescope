@@ -18,3 +18,5 @@ const telescope = {
 export default telescope;
 
 export { Telescope, telescopeMiddleware, StorageInterface, MongoStorage, logger, EntryType };
+
+console.log('node-telescope module exports have been set up');
