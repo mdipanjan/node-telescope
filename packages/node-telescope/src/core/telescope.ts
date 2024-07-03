@@ -164,12 +164,10 @@ export class Telescope {
   private setupExceptionLogging(): void {
     if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
       process.on('uncaughtException', (error: Error) => {
-        console.log('HELLO 111');
         this.logException(error);
       });
 
       process.on('unhandledRejection', (reason: any) => {
-        console.log('HELLO 222', reason);
         if (reason instanceof Error) {
           this.logException(reason);
         } else {
