@@ -53,8 +53,6 @@ export class Telescope {
   public setupWithExpress(): void {
     const { app, server, routePrefix, corsOptions } = this.options;
     if (app && server) {
-      app.use(telescopeMiddleware(this));
-
       app.use(cors(this.options.corsOptions));
       app.use(this.options.routePrefix, express.static('public'));
 

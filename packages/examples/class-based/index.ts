@@ -82,8 +82,8 @@ class TestServer {
       app: this.app, // Provide the Express app
       server: this.server, // Provide the HTTP server
     });
-    console.log('Telescope initialized with options:', this.telescope.options);
-
+    // console.log('Telescope initialized with options:', this.telescope.options);
+    // Add the Telescope middleware to the Express app
     this.app.use(this.telescope.middleware());
   }
 

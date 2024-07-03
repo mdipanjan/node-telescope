@@ -93,8 +93,8 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
   }
 
   async storeEntry(entry: Omit<Entry, 'id'>): Promise<string> {
-    console.log('Storing entry of type:', entry.type);
-    console.log('Storing entry:', JSON.stringify(entry, null, 2));
+    // console.log('Storing entry of type:', entry.type);
+    // console.log('Storing entry:', JSON.stringify(entry, null, 2));
     try {
       const newEntry = new this.EntryModel(entry);
       await newEntry.save();

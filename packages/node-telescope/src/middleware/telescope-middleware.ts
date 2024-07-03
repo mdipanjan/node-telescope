@@ -4,6 +4,8 @@ import { EntryType, RequestEntry } from '../types';
 
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
+    console.log(`Telescope middleware called for ${req.method} ${req.url}`);
+
     const startTime = Date.now();
 
     const chunks: Buffer[] = [];
@@ -59,7 +61,6 @@ export function telescopeMiddleware(telescope: Telescope) {
           body: responseBody.substring(0, 1000), // Limit response body size
         },
       };
-      console.log('Entry type being stored:', entry.type); // remove dev log later
 
       if (telescope.options.watchedEntries.includes(EntryType.REQUESTS)) {
         telescope.storage.storeEntry(entry);
