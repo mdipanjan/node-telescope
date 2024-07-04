@@ -1,11 +1,23 @@
 import { EventEmitter } from 'events';
 import { Entry, EntryType } from '../types';
+import { SortOrder } from 'mongoose';
 
 export interface QueryOptions {
   type?: EntryType;
   page?: number;
   perPage?: number;
   [key: string]: unknown;
+}
+
+export interface AdvancedQueryOptions {
+  page?: number;
+  perPage?: number;
+  type?: EntryType | EntryType[];
+  requestId?: string;
+  startDate?: Date | string;
+  endDate?: Date | string;
+  sort?: { [key: string]: SortOrder };
+  [key: string]: any;
 }
 
 export interface StorageInterface extends EventEmitter {

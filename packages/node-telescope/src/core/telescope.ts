@@ -5,9 +5,10 @@ import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
-import { EntryType, ExceptionEntry, QueryEntry } from '../types';
+import { EntryType, EventTypes, ExceptionEntry, QueryEntry } from '../types';
 import mongoose from 'mongoose';
 import { MongoStorage } from '../storage/mongo-storage';
+import { getRequestId } from '../utils/async-context';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -80,13 +81,18 @@ export class Telescope {
 
   private async handleSocketConnection(socket: Socket): Promise<void> {
     try {
-      const recentEntries = await this.storage.getRecentEntries(100);
+      const recentEntries = await this.storage.getEntries({
+        page: 1,
+        perPage: 50,
+        sort: { timestamp: -1 },
+        type: EntryType.REQUESTS,
+      });
       socket.emit('initialEntries', recentEntries);
     } catch (error) {
       logger.error('Failed to send initial entries:', error);
     }
-    this.storage.on('newEntry', (entry: unknown) => {
-      socket.emit('newEntry', entry);
+    this.storage.on(EventTypes.NEW_ENTRY, (entry: unknown) => {
+      socket.emit(EventTypes.NEW_ENTRY, entry);
     });
   }
 
@@ -157,8 +163,10 @@ export class Telescope {
               (this as any)._telescopeStartTime = Date.now();
             });
             //@ts-ignore
+
             schema.post(method, function (this: any, result) {
               const duration = Date.now() - (this._telescopeStartTime || Date.now());
+              const requestId = getRequestId();
               const entry: QueryEntry = {
                 type: EntryType.QUERIES,
                 timestamp: new Date(this._telescopeStartTime),
@@ -168,6 +176,7 @@ export class Telescope {
                   collection: this.model ? this.model.collection.name : this.collection.name,
                   duration,
                   result: result ? JSON.stringify(result).substring(0, 200) : undefined,
+                  requestId: requestId,
                 },
               };
 
@@ -186,6 +195,7 @@ export class Telescope {
 
           schema.post('save', function (this: any) {
             const duration = Date.now() - (this._telescopeStartTime || Date.now());
+            const requestId = getRequestId();
             const entry: QueryEntry = {
               type: EntryType.QUERIES,
               timestamp: new Date(this._telescopeStartTime),
@@ -195,6 +205,7 @@ export class Telescope {
                 collection: this.constructor.collection.name,
                 duration,
                 result: JSON.stringify(this.toObject()).substring(0, 200),
+                requestId: requestId,
               },
             };
 

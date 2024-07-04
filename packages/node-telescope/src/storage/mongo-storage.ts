@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, Connection } from 'mongoose';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { StorageInterface, QueryOptions } from './storage-interface';
+import { StorageInterface, AdvancedQueryOptions } from './storage-interface';
 import { logger } from '../utils/logger';
-import { Entry, EntryType } from '../types';
+import { Entry, EntryType, EventTypes } from '../types';
+import { FilterQuery } from 'mongoose';
 
 const requestEntrySchema = new Schema({
   duration: Number,
@@ -13,6 +14,7 @@ const requestEntrySchema = new Schema({
     headers: Object,
     body: Schema.Types.Mixed,
     ip: String,
+    requestId: String,
   },
   response: {
     statusCode: Number,
@@ -36,6 +38,7 @@ const queryEntrySchema = new Schema({
     query: String,
     collection: String,
     result: Schema.Types.Mixed,
+    requestId: String,
   },
 });
 
@@ -80,7 +83,7 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
     try {
       const newEntry = new this.EntryModel(entry);
       await newEntry.save();
-      this.emit('newEntry', newEntry.toObject());
+      this.emit(EventTypes.NEW_ENTRY, newEntry.toObject());
       return newEntry.id;
     } catch (error) {
       logger.error('Failed to store entry:', error);
@@ -97,16 +100,49 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
     }
   }
 
-  async getEntries(query: QueryOptions): Promise<{ entries: Entry[]; pagination: unknown }> {
+  async getEntries(
+    queryOptions: AdvancedQueryOptions,
+  ): Promise<{ entries: Entry[]; pagination: unknown }> {
+    console.log('Received queryOptions:', queryOptions);
     try {
-      const { page = 1, perPage = 20, type, ...filters } = query;
+      const {
+        page = 1,
+        perPage = 20,
+        type,
+        requestId,
+        startDate,
+        endDate,
+        sort = { timestamp: -1 },
+        ...filters
+      } = queryOptions;
+
       const skip = (page - 1) * perPage;
-      const findQuery = type ? { type, ...filters } : filters;
-      const entries = await this.EntryModel.find(filters)
-        .sort({ timestamp: -1 })
+      let findQuery: FilterQuery<Entry> = { ...filters };
+
+      if (type) {
+        findQuery.type = Array.isArray(type) ? { $in: type } : type;
+      }
+
+      if (requestId) {
+        findQuery.$or = [{ 'request.requestId': requestId }, { 'data.requestId': requestId }];
+      }
+
+      if (startDate || endDate) {
+        findQuery.timestamp = {};
+        if (startDate) findQuery.timestamp.$gte = new Date(startDate);
+        if (endDate) findQuery.timestamp.$lte = new Date(endDate);
+      }
+
+      console.log('Constructed findQuery:', JSON.stringify(findQuery, null, 2));
+      console.log('Sort order:', sort);
+
+      const entries = await this.EntryModel.find(findQuery)
+        .sort(sort)
         .skip(skip)
         .limit(perPage)
         .lean();
+
+      console.log(`Found ${entries.length} entries`);
 
       const total = await this.EntryModel.countDocuments(findQuery);
 
@@ -124,10 +160,10 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
       throw error;
     }
   }
-
+  // this could be used when user comes to request for recent entries
   async getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]> {
     try {
-      const query = type ? { type } : {};
+      const query = type ? { type } : { type: EntryType.REQUESTS };
       return await this.EntryModel.find(query).sort({ timestamp: -1 }).limit(limit).lean();
     } catch (error) {
       logger.error('Failed to get recent entries:', error);

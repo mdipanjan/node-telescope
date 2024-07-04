@@ -4,52 +4,31 @@ import { SearchOutlined } from '@ant-design/icons';
 import { blue, green } from '@ant-design/colors';
 import { timeAgo } from '../utility/time';
 import { getStatusColor } from '../utility/color';
+import { EventTypes } from '../types/TelescopeEventTypes';
+import { Entry, RequestObj, RequestsProps, RequestType, ResponseObj } from '../types/GeneralTypes';
 
-interface Request {
-  id: string;
-  verb: string;
-  path: string;
-  status: number;
-  duration: number;
-  happened: string;
-}
-
-interface RequestsProps {
-  socket: any;
-  theme: 'light' | 'dark';
-}
-type RequestObj = {
-  ip: string;
-  method: string;
-  url: string;
-};
-type ResponseObj = {
-  body: string;
-  statusCode: number;
-  headers: Record<string, string>;
-};
 const { Text } = Typography;
 
 const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<Entry[]>([]);
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     if (socket) {
       console.log('Setting up socket listeners in Requests component');
 
-      socket.on('initialEntries', (entries: Request[]) => {
-        console.log('Received initial entries:', entries);
-        setRequests(entries);
+      socket.on(EventTypes.INITIAL_ENTRIES, (data: RequestType) => {
+        console.log('Received initial entries:', data);
+        setRequests(data?.entries);
       });
 
-      socket.on('newEntry', (entry: Request) => {
+      socket.on(EventTypes.NEW_ENTRY, (entry: Request) => {
         console.log('Received new entry:', entry);
-        setRequests(prevRequests => [entry, ...prevRequests]);
+        setRequests(prevRequests => [entry, ...prevRequests] as any);
       });
 
       // Request initial entries
-      socket.emit('getInitialEntries');
+      socket.emit('getInitialEntries'); // have to decide on this
 
       // Error handling
       socket.on('error', (error: any) => {
@@ -113,7 +92,7 @@ const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
   ];
 
   const loadNewEntries = () => {
-    socket.emit('getInitialEntries');
+    socket.emit('getInitialEntries'); // have to decide on this
   };
 
   return (

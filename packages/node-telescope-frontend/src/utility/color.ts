@@ -10,3 +10,11 @@ export const getStatusColor = (status: number): string => {
   if (status < 500) return gold[6]; // 4xx - Client Error
   return red[5]; // 5xx - Server Error
 };
+
+// To fetch query by requestId
+
+// async function getRelatedQueries(requestId: string) {
+//   const response = await fetch(`/telescope/api/entries?type=queries&requestId=${requestId}`);
+//   const queries = await response.json();
+//   return queries;
+// }

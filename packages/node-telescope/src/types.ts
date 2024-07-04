@@ -22,6 +22,7 @@ export interface RequestEntry extends BaseEntry {
     headers: Record<string, string>;
     body: any;
     ip: string;
+    requestId?: string;
   };
   response: {
     statusCode: number;
@@ -61,7 +62,13 @@ export interface QueryEntry extends BaseEntry {
     collection: string;
     duration: number;
     result?: string;
+    requestId?: string;
   };
 }
 
 export type Entry = RequestEntry | ExceptionEntry | QueryEntry | LogEntry | EventEntry | ViewEntry;
+
+export enum EventTypes {
+  NEW_ENTRY = 'newEntry',
+  INITIAL_ENTRIES = 'initialEntries',
+}
