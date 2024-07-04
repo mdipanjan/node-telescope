@@ -15,7 +15,6 @@ export interface RequestType {
 
 export interface RequestsProps {
   socket: any;
-  theme: 'light' | 'dark';
 }
 export type RequestObj = {
   ip: string;

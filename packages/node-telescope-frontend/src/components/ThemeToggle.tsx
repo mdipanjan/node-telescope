@@ -1,17 +1,15 @@
 import React from 'react';
 import { Switch } from 'antd';
 import { BulbOutlined, BulbFilled } from '@ant-design/icons';
+import { useTheme } from '../context/ThemeContext';
 
-interface ThemeToggleProps {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-}
+const ThemeToggle: React.FC = () => {
+  const { isDarkMode, toggleTheme } = useTheme();
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
   return (
     <div className="absolute bottom-4 left-4">
       <Switch
-        checked={theme === 'dark'}
+        checked={isDarkMode}
         onChange={toggleTheme}
         checkedChildren={<BulbOutlined />}
         unCheckedChildren={<BulbFilled />}

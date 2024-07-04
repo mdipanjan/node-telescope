@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Flex, Layout, Menu, message } from 'antd';
+import { Flex, Layout, Menu, message, theme } from 'antd';
 import {
   DatabaseOutlined,
   CodeOutlined,
@@ -8,33 +8,29 @@ import {
 } from '@ant-design/icons';
 import ThemeToggle from '../components/ThemeToggle';
 import Requests from '../components/Requests';
-import { gray, purple } from '@ant-design/colors';
 import { io } from 'socket.io-client';
+import { useTheme } from '../context/ThemeContext';
 
 const LayoutComponent = () => {
   const { Sider, Content, Header, Footer } = Layout;
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { token } = theme.useToken();
+
   const headerStyle: React.CSSProperties = {
     textAlign: 'center',
-    color: '#fff',
     height: 64,
     paddingInline: 48,
     lineHeight: '64px',
-    backgroundColor: '#fff',
+    // backgroundColor: defineColor('background', currentTheme),
   };
 
   const footerStyle: React.CSSProperties = {
     textAlign: 'center',
-    color: '#fff',
-    backgroundColor: '#fff',
   };
 
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [selectedMenu, setSelectedMenu] = useState('requests');
   const [socket, setSocket] = useState<any>(null);
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
   useEffect(() => {
     const newSocket = io('http://localhost:4000', {
       path: '/telescope/socket.io',
@@ -61,20 +57,23 @@ const LayoutComponent = () => {
   return (
     <Flex gap="middle" wrap>
       <Layout style={{ height: '100vh' }}>
-        <Sider theme={theme} className="h-screen">
+        <Sider theme={isDarkMode ? 'dark' : 'light'} className="h-screen">
           <div
             style={{
               padding: 16,
               paddingLeft: 20,
               fontSize: 20,
               fontWeight: 600,
-              color: theme === 'light' ? purple[9] : gray[1],
             }}
             className="logo font-bold"
           >
             Telescope
           </div>
-          <Menu theme={theme} mode="inline" defaultSelectedKeys={['requests']}>
+          <Menu
+            theme={isDarkMode ? 'dark' : 'light'}
+            mode="inline"
+            defaultSelectedKeys={['requests']}
+          >
             <Menu.Item
               key="requests"
               icon={<DatabaseOutlined />}
@@ -106,14 +105,29 @@ const LayoutComponent = () => {
           </Menu>
         </Sider>
         <Layout>
-          <Header style={headerStyle}>
+          <Layout.Header
+            style={{
+              textAlign: 'center',
+              height: 64,
+              paddingInline: 48,
+              lineHeight: '64px',
+              background: token.colorBgContainer,
+              color: token.colorText,
+              borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          >
             <Flex gap="middle" align="end" vertical>
-              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              <ThemeToggle />
             </Flex>
-          </Header>
+          </Layout.Header>
           <Layout>
-            <Content style={{ margin: 20 }} className="p-6">
-              {selectedMenu === 'requests' && <Requests socket={socket} theme={theme} />}
+            <Content
+              style={{
+                margin: 20,
+              }}
+              className="p-6"
+            >
+              {selectedMenu === 'requests' && <Requests socket={socket} />}
             </Content>
           </Layout>
           <Footer style={footerStyle}>Footer</Footer>

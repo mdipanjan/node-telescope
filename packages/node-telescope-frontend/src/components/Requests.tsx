@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Input, Tag, Typography, Button, message } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import { blue, green } from '@ant-design/colors';
+import { Table, Tag, Typography, message } from 'antd';
+import { blue } from '@ant-design/colors';
 import { timeAgo } from '../utility/time';
-import { getStatusColor } from '../utility/color';
 import { EventTypes } from '../types/TelescopeEventTypes';
 import { Entry, RequestObj, RequestsProps, RequestType, ResponseObj } from '../types/GeneralTypes';
+import { getStatusColor } from '../utility/color';
 
 const { Text } = Typography;
 
-const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
+const Requests: React.FC<RequestsProps> = ({ socket }) => {
   const [requests, setRequests] = useState<Entry[]>([]);
-  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     if (socket) {
@@ -55,7 +53,10 @@ const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
       render: (obj: RequestObj) => (
         <Tag
           color={obj?.method === 'GET' ? blue[4] : 'blue'}
-          style={{ width: 50, textAlign: 'center' }}
+          style={{
+            width: 50,
+            textAlign: 'center',
+          }}
         >
           {obj?.method}
         </Tag>
@@ -65,9 +66,7 @@ const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
       title: 'Path',
       dataIndex: 'request',
       key: 'path',
-      render: (obj: RequestObj) => (
-        <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>{obj?.url}</Text>
-      ),
+      render: (obj: RequestObj) => <Text>{obj?.url}</Text>,
     },
     {
       title: 'Status',
@@ -87,6 +86,7 @@ const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
       title: 'Happened',
       dataIndex: 'timestamp',
       key: 'happened',
+
       render: (time: string) => <Text type="secondary">{timeAgo(time)}</Text>,
     },
   ];
@@ -97,19 +97,11 @@ const Requests: React.FC<RequestsProps> = ({ socket, theme }) => {
 
   return (
     <div>
-      {/* <Input
-          placeholder="Search Path"
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={e => setSearchText(e.target.value)}
-          style={{ marginBottom: 16 }}
-        /> */}
       <Table
         dataSource={requests}
         columns={columns as any}
         rowKey="id"
         pagination={{ pageSize: 10 }}
-        className={theme === 'dark' ? 'ant-table-dark' : ''}
       />
     </div>
   );
