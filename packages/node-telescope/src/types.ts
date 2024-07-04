@@ -55,10 +55,13 @@ export interface ViewEntry extends BaseEntry {
 
 export interface QueryEntry extends BaseEntry {
   type: EntryType.QUERIES;
-  connection: string;
-  query: string;
-  duration: number;
-  result?: any;
+  data: {
+    method: string;
+    query: string;
+    collection: string;
+    duration: number;
+    result?: string;
+  };
 }
 
 export type Entry = RequestEntry | ExceptionEntry | QueryEntry | LogEntry | EventEntry | ViewEntry;

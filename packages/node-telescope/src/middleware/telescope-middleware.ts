@@ -15,7 +15,9 @@ export function telescopeMiddleware(telescope: Telescope) {
     res.write = function (
       this: Response,
       chunk: any,
-      encoding?: BufferEncoding | ((error: Error | null) => void),
+      //@ts-ignore
+      encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
+      //@ts-ignore
       cb?: (error: Error | null) => void,
     ): boolean {
       chunks.push(Buffer.from(chunk));
@@ -25,7 +27,9 @@ export function telescopeMiddleware(telescope: Telescope) {
     res.end = function (
       this: Response,
       chunk?: any,
-      encoding?: BufferEncoding | (() => void),
+      //@ts-ignore
+      encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
+      //@ts-ignore
       cb?: () => void,
     ): Response {
       if (chunk) {

@@ -5,8 +5,9 @@ import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
-import { EntryType, ExceptionEntry } from '../types';
+import { EntryType, ExceptionEntry, QueryEntry } from '../types';
 import mongoose from 'mongoose';
+import { MongoStorage } from '../storage/mongo-storage';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -51,7 +52,7 @@ export class Telescope {
   }
 
   public setupWithExpress(): void {
-    const { app, server, routePrefix, corsOptions } = this.options;
+    const { app, server } = this.options;
     if (app && server) {
       app.use(cors(this.options.corsOptions));
       app.use(this.options.routePrefix, express.static('public'));
@@ -126,36 +127,92 @@ export class Telescope {
   }
 
   private setupQueryLogging(): void {
-    if (this.options.watchedEntries.includes(EntryType.QUERIES)) {
-      const telescopeInstance = this;
-      mongoose.plugin(function (schema) {
-        ['find', 'findOne', 'findOneAndUpdate', 'updateOne', 'deleteOne'].forEach(method => {
-          // @ts-ignore: Adding custom property to the query
-          schema.pre(method, function (this: mongoose.Query<any, any>) {
-            const startTime = Date.now();
-            // @ts-ignore: Adding custom property to the query
-            this.queryStartTime = startTime;
-          });
-          // @ts-ignore: Adding custom property to the query
-          schema.post(method, function (this: mongoose.Query<any, any>, result: any) {
-            const endTime = Date.now();
-            // @ts-ignore: Accessing custom property from the query
-            const duration = endTime - (this.queryStartTime || endTime);
+    if (
+      this.options.enableQueryLogging &&
+      this.options.watchedEntries.includes(EntryType.QUERIES)
+    ) {
+      const storage = this.storage as MongoStorage;
+      const connection = storage.connection;
 
-            const entry = {
+      if (connection) {
+        const queryPlugin = (schema: mongoose.Schema) => {
+          const methods = [
+            'find',
+            'findOne',
+            'findOneAndUpdate',
+            'updateOne',
+            'updateMany',
+            'deleteOne',
+            'deleteMany',
+            'aggregate',
+            'insertMany',
+            'create',
+          ];
+
+          methods.forEach(method => {
+            //@ts-ignore
+            schema.pre(method, function () {
+              //@ts-ignore
+
+              (this as any)._telescopeStartTime = Date.now();
+            });
+            //@ts-ignore
+            schema.post(method, function (this: any, result) {
+              const duration = Date.now() - (this._telescopeStartTime || Date.now());
+              const entry: QueryEntry = {
+                type: EntryType.QUERIES,
+                timestamp: new Date(this._telescopeStartTime),
+                data: {
+                  method,
+                  query: JSON.stringify(this.getQuery ? this.getQuery() : this),
+                  collection: this.model ? this.model.collection.name : this.collection.name,
+                  duration,
+                  result: result ? JSON.stringify(result).substring(0, 200) : undefined,
+                },
+              };
+
+              console.log('Query Logging:', entry);
+              storage
+                .storeEntry(entry as any)
+                .then(() => console.log('Query entry stored successfully'))
+                .catch(error => console.error('Failed to store query entry:', error));
+            });
+          });
+
+          // Add logging for 'save' method
+          schema.pre('save', function () {
+            (this as any)._telescopeStartTime = Date.now();
+          });
+
+          schema.post('save', function (this: any) {
+            const duration = Date.now() - (this._telescopeStartTime || Date.now());
+            const entry: QueryEntry = {
               type: EntryType.QUERIES,
-              timestamp: new Date(),
+              timestamp: new Date(this._telescopeStartTime),
               data: {
-                method,
-                query: this.getQuery(),
-                collection: this.model.collection.name,
+                method: 'save',
+                query: JSON.stringify(this.toObject()),
+                collection: this.constructor.collection.name,
                 duration,
+                result: JSON.stringify(this.toObject()).substring(0, 200),
               },
             };
-            telescopeInstance.storage.storeEntry(entry as any); // remove any type later
+
+            console.log('Query Logging (Save):', entry);
+            storage
+              .storeEntry(entry as any)
+              .then(() => console.log('Save query entry stored successfully'))
+              .catch(error => console.error('Failed to store save query entry:', error));
           });
-        });
-      });
+        };
+
+        // Apply the plugin to the connection
+        connection.plugin(queryPlugin);
+
+        console.log('Comprehensive query logging set up successfully');
+      } else {
+        console.warn('MongoDB connection not available for query logging');
+      }
     }
   }
 

@@ -1,33 +1,9 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Connection } from 'mongoose';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageInterface, QueryOptions } from './storage-interface';
 import { logger } from '../utils/logger';
 import { Entry, EntryType } from '../types';
-
-const baseEntrySchema = new Schema(
-  {
-    id: {
-      type: String,
-      default: uuidv4,
-      unique: true,
-    },
-    type: {
-      type: String,
-      enum: Object.values(EntryType),
-      required: true,
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-      required: true,
-    },
-  },
-  {
-    discriminatorKey: 'type',
-    _id: false,
-  },
-);
 
 const requestEntrySchema = new Schema({
   duration: Number,
@@ -54,27 +30,38 @@ const exceptionEntrySchema = new Schema({
 });
 
 const queryEntrySchema = new Schema({
-  connection: String,
-  query: String,
   duration: Number,
-  result: Schema.Types.Mixed,
+  data: {
+    method: String,
+    query: String,
+    collection: String,
+    result: Schema.Types.Mixed,
+  },
 });
 
 export interface MongoStorageOptions {
-  uri: string;
+  connection: Connection;
   dbName: string;
 }
 
 export class MongoStorage extends EventEmitter implements StorageInterface {
   private EntryModel: mongoose.Model<Entry & Document>;
-  private options: MongoStorageOptions;
+  public connection: Connection;
 
   constructor(options: MongoStorageOptions) {
     super();
-    this.options = options;
-    mongoose.connect(options.uri, { dbName: options.dbName });
+    this.connection = options.connection;
 
-    this.EntryModel = mongoose.model<Entry & Document>('Entry', baseEntrySchema);
+    const baseEntrySchema = new Schema(
+      {
+        id: { type: String, default: uuidv4, unique: true },
+        type: { type: String, enum: Object.values(EntryType), required: true },
+        timestamp: { type: Date, default: Date.now, required: true },
+      },
+      { discriminatorKey: 'type', _id: false },
+    );
+
+    this.EntryModel = this.connection.model<Entry & Document>('Entry', baseEntrySchema);
     this.EntryModel.discriminator(EntryType.REQUESTS, requestEntrySchema);
     this.EntryModel.discriminator(EntryType.EXCEPTIONS, exceptionEntrySchema);
     this.EntryModel.discriminator(EntryType.QUERIES, queryEntrySchema);
@@ -82,9 +69,6 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
 
   async connect(): Promise<void> {
     try {
-      await mongoose.connect(this.options.uri, {
-        dbName: this.options.dbName,
-      });
       logger.info('Connected to MongoDB');
     } catch (error) {
       logger.error('Failed to connect to MongoDB:', error);
@@ -93,8 +77,6 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
   }
 
   async storeEntry(entry: Omit<Entry, 'id'>): Promise<string> {
-    // console.log('Storing entry of type:', entry.type);
-    // console.log('Storing entry:', JSON.stringify(entry, null, 2));
     try {
       const newEntry = new this.EntryModel(entry);
       await newEntry.save();

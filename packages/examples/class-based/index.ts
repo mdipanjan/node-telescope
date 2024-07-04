@@ -1,7 +1,7 @@
 // This is a test server to test the Telescope library
 import express, { Express, Request, Response, NextFunction } from 'express';
-import mongoose, { Schema, Document } from 'mongoose';
-import telescope, { Telescope, MongoStorage, EntryType } from 'node-telescope';
+import mongoose, { Schema, Document, Connection } from 'mongoose';
+import  { Telescope, MongoStorage, EntryType } from 'node-telescope';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { Server as HttpServer } from 'http';
@@ -21,15 +21,13 @@ class TestServer {
   private telescope!: Telescope;
   private storage!: MongoStorage;
   private User!: mongoose.Model<IUser>;
+  private mongoConnection!: Connection;
 
   constructor() {
     this.app = express();
     this.server = new HttpServer(this.app);
     this.configureMiddleware();
-    this.configureMongoose();
-    this.configureTelescope();
-    this.configureRoutes();
-    this.configureErrorHandling();
+
   }
 
   private configureMiddleware(): void {
@@ -38,37 +36,44 @@ class TestServer {
     // Apply CORS to all routes
     this.app.use(
       cors({
-        origin: 'http://localhost:3000', // Your React app URL
+        origin: 'http://localhost:3000', //  React app URL for local development
         credentials: true,
       }),
     );
   }
 
-  private configureMongoose(): void {
+  private async configureMongoose(): Promise<void> {
     const MONGO_URI = process.env.DB_URI || '';
-    mongoose
-      .connect(MONGO_URI)
-      .then(() => console.log('Connected to MongoDB'))
-      .catch(err => console.error('MongoDB connection error:', err));
+    try {
+      this.mongoConnection = await mongoose.createConnection(MONGO_URI);
+      
+      // Wait for the connection to be ready
+      await new Promise<void>((resolve, reject) => {
+        this.mongoConnection.once('connected', () => {
+          console.log('MongoDB connection established successfully');
+          resolve();
+        });
+        this.mongoConnection.once('error', (err) => {
+          console.error('MongoDB connection error:', err);
+          reject(err);
+        });
+      });
 
-    const UserSchema = new Schema<IUser>({
-      name: { type: String, required: true },
-      email: { type: String, required: true, unique: true },
-      createdAt: { type: Date, default: Date.now },
-    });
-
-    this.User = mongoose.model<IUser>('User', UserSchema);
+      
+    } catch (error) {
+      console.error('Failed to configure MongoDB:', error);
+      throw error;
+    }
   }
 
   private configureTelescope(): void {
-    const TELESCOPE_DB = process.env.DB_NAME || '';
-    const MONGO_URI = process.env.DB_URI || '';
+    const dbName = process.env.DB_NAME || '';
 
     this.storage = new MongoStorage({
-      uri: MONGO_URI,
-      dbName: TELESCOPE_DB,
+      connection: this.mongoConnection,
+      dbName: dbName,
     });
-
+   
     this.telescope = new Telescope({
       storage: this.storage,
       watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
@@ -82,9 +87,16 @@ class TestServer {
       app: this.app, // Provide the Express app
       server: this.server, // Provide the HTTP server
     });
-    // console.log('Telescope initialized with options:', this.telescope.options);
-    // Add the Telescope middleware to the Express app
     this.app.use(this.telescope.middleware());
+  }
+  
+  private async modelInit(): Promise<void> {
+    const UserSchema = new Schema<IUser>({
+      name: { type: String, required: true },
+      email: { type: String, required: true, unique: true },
+      createdAt: { type: Date, default: Date.now },
+    });
+    this.User = this.mongoConnection.model<IUser>('User', UserSchema);
   }
 
   private configureRoutes(): void {
@@ -95,6 +107,19 @@ class TestServer {
 
   }
 
+  public async initialize(): Promise<void> {
+    try {
+      await this.configureMongoose();
+      await this.configureTelescope();
+      await this.modelInit();
+      this.configureRoutes();
+      this.configureErrorHandling();
+    } catch (error) {
+      console.error('Failed to initialize the server:', error);
+      throw error;
+    }
+  }
+  
   private async triggerError(req: Request, res: Response): Promise<void> {
     throw new Error('This is a test error');
   }
@@ -136,8 +161,7 @@ class TestServer {
 
   public async start(): Promise<void> {
     try {
-      await this.storage.connect();
-      await this.telescope.connect();
+      await this.initialize();
       const PORT = process.env.TEST_SERVER_PORT || 4000;
       this.server.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
@@ -154,7 +178,7 @@ class TestServer {
   private setupGracefulShutdown(): void {
     process.on('SIGINT', async () => {
       try {
-        await mongoose.connection.close();
+        await this.mongoConnection.close();
         console.log('MongoDB connection closed');
         process.exit(0);
       } catch (error) {
