@@ -10,10 +10,11 @@ import ThemeToggle from '../components/ThemeToggle';
 import Requests from '../components/Requests';
 import { io } from 'socket.io-client';
 import { useTheme } from '../context/ThemeContext';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 const LayoutComponent = () => {
   const { Sider, Content, Header, Footer } = Layout;
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
   const { token } = theme.useToken();
 
   const headerStyle: React.CSSProperties = {
@@ -21,7 +22,6 @@ const LayoutComponent = () => {
     height: 64,
     paddingInline: 48,
     lineHeight: '64px',
-    // backgroundColor: defineColor('background', currentTheme),
   };
 
   const footerStyle: React.CSSProperties = {
@@ -72,35 +72,29 @@ const LayoutComponent = () => {
           <Menu
             theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
-            defaultSelectedKeys={['requests']}
+            defaultSelectedKeys={['/requests']}
           >
             <Menu.Item
-              key="requests"
+              key="/requests"
               icon={<DatabaseOutlined />}
               onClick={() => setSelectedMenu('requests')}
             >
-              Requests
+              <Link to="/requests">Requests</Link>
             </Menu.Item>
+
             <Menu.Item
-              key="commands"
+              key="/exceptions"
               icon={<CodeOutlined />}
               onClick={() => setSelectedMenu('commands')}
             >
-              Commands
+              <Link to="/exceptions">Exceptions</Link>
             </Menu.Item>
             <Menu.Item
-              key="schedule"
+              key="/queries"
               icon={<ClockCircleOutlined />}
               onClick={() => setSelectedMenu('schedule')}
             >
-              Schedule
-            </Menu.Item>
-            <Menu.Item
-              key="jobs"
-              icon={<ScheduleOutlined />}
-              onClick={() => setSelectedMenu('jobs')}
-            >
-              Jobs
+              <Link to="/queries">Queries</Link>
             </Menu.Item>
           </Menu>
         </Sider>
@@ -127,6 +121,10 @@ const LayoutComponent = () => {
               }}
               className="p-6"
             >
+              <Routes>
+                <Route path="/" element={<Navigate to="/requests" replace />} />
+              </Routes>
+
               {selectedMenu === 'requests' && <Requests socket={socket} />}
             </Content>
           </Layout>

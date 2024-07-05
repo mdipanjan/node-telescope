@@ -14,21 +14,23 @@ function App() {
 
   return (
     <div>
-      <ThemeProvider isDarkMode={isDarkMode} toggleTheme={toggleTheme}>
-        <ConfigProvider
-          theme={{
-            algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-            token: {
-              colorPrimary: '#00b96b',
-              colorBgContainer: isDarkMode ? '#141414' : '#ffffff',
-              colorBgElevated: isDarkMode ? '#1f1f1f' : '#ffffff',
-              colorBorderSecondary: isDarkMode ? '#303030' : '#f0f0f0',
-            },
-          }}
-        >
-          <LayoutComponent />
-        </ConfigProvider>
-      </ThemeProvider>
+      <Router>
+        <ThemeProvider isDarkMode={isDarkMode} toggleTheme={toggleTheme}>
+          <ConfigProvider
+            theme={{
+              algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+              token: {
+                colorPrimary: '#00b96b',
+                colorBgContainer: isDarkMode ? '#141414' : '#ffffff',
+                colorBgElevated: isDarkMode ? '#1f1f1f' : '#ffffff',
+                colorBorderSecondary: isDarkMode ? '#303030' : '#f0f0f0',
+              },
+            }}
+          >
+            <LayoutComponent />
+          </ConfigProvider>
+        </ThemeProvider>
+      </Router>
     </div>
   );
 }
