@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Flex, Layout, Menu, message, theme } from 'antd';
-import {
-  DatabaseOutlined,
-  CodeOutlined,
-  ClockCircleOutlined,
-  ScheduleOutlined,
-} from '@ant-design/icons';
+import { DatabaseOutlined, CodeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import ThemeToggle from '../components/ThemeToggle';
-import Requests from '../components/Requests';
+import Requests from '../views/Requests';
 import { io } from 'socket.io-client';
 import { useTheme } from '../context/ThemeContext';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import RequestDetails from '../views/RequestDetails';
 
 const LayoutComponent = () => {
   const { Sider, Content, Header, Footer } = Layout;
@@ -54,10 +50,14 @@ const LayoutComponent = () => {
       newSocket.close();
     };
   }, []);
+
   return (
     <Flex gap="middle" wrap>
-      <Layout style={{ height: '100vh' }}>
-        <Sider theme={isDarkMode ? 'dark' : 'light'} className="h-screen">
+      <Layout style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}>
+        <Sider
+          theme={isDarkMode ? 'dark' : 'light'}
+          style={{ height: '100vh', position: 'fixed', left: 0 }}
+        >
           <div
             style={{
               padding: 16,
@@ -98,7 +98,9 @@ const LayoutComponent = () => {
             </Menu.Item>
           </Menu>
         </Sider>
-        <Layout>
+        <Layout
+          style={{ marginLeft: 200, display: 'flex', flexDirection: 'column', height: '100vh' }}
+        >
           <Layout.Header
             style={{
               textAlign: 'center',
@@ -115,20 +117,17 @@ const LayoutComponent = () => {
             </Flex>
           </Layout.Header>
           <Layout>
-            <Content
-              style={{
-                margin: 20,
-              }}
-              className="p-6"
-            >
+            <Content style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
               <Routes>
                 <Route path="/" element={<Navigate to="/requests" replace />} />
+                <Route path="/requests" element={<Requests socket={socket} />} />
+                <Route path="/requests/:id" element={<RequestDetails />} />
+                <Route path="/exceptions" element={<div>Exceptions component</div>} />
+                <Route path="/queries" element={<div>Queries component</div>} />
               </Routes>
-
-              {selectedMenu === 'requests' && <Requests socket={socket} />}
             </Content>
           </Layout>
-          <Footer style={footerStyle}>Footer</Footer>
+          {/* <Footer style={footerStyle}>Footer</Footer> */}
         </Layout>
       </Layout>
     </Flex>

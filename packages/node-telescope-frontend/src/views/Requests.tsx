@@ -5,6 +5,7 @@ import { timeAgo } from '../utility/time';
 import { EventTypes } from '../types/TelescopeEventTypes';
 import { Entry, RequestObj, RequestsProps, RequestType, ResponseObj } from '../types/GeneralTypes';
 import { getStatusColor } from '../utility/color';
+import { Link } from 'react-router-dom';
 
 const { Text } = Typography;
 
@@ -86,8 +87,14 @@ const Requests: React.FC<RequestsProps> = ({ socket }) => {
       title: 'Happened',
       dataIndex: 'timestamp',
       key: 'happened',
-
       render: (time: string) => <Text type="secondary">{timeAgo(time)}</Text>,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (text: string, record: any) => (
+        <Link to={`/requests/${record.id}`}>View Details</Link>
+      ),
     },
   ];
 
