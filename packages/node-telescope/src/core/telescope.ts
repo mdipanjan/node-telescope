@@ -80,17 +80,22 @@ export class Telescope {
   }
 
   private async handleSocketConnection(socket: Socket): Promise<void> {
-    try {
-      const recentEntries = await this.storage.getEntries({
-        page: 1,
-        perPage: 50,
-        sort: { timestamp: -1 },
-        type: EntryType.REQUESTS,
-      });
-      socket.emit('initialEntries', recentEntries);
-    } catch (error) {
-      logger.error('Failed to send initial entries:', error);
-    }
+    const sendInitialEntries = async () => {
+      try {
+        const recentEntries = await this.storage.getEntries({
+          page: 1,
+          perPage: 20,
+          sort: { timestamp: -1 },
+          type: EntryType.REQUESTS,
+        });
+        socket.emit(EventTypes.INITIAL_ENTRIES, recentEntries);
+      } catch (error) {
+        logger.error('Failed to send initial entries:', error);
+        socket.emit('error', { message: 'Failed to fetch initial entries' });
+      }
+    };
+    socket.on('getInitialEntries', sendInitialEntries);
+
     this.storage.on(EventTypes.NEW_ENTRY, (entry: unknown) => {
       socket.emit(EventTypes.NEW_ENTRY, entry);
     });

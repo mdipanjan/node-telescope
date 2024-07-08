@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import { useTheme } from '../context/ThemeContext';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import RequestDetails from '../views/RequestDetails';
+import Exceptions from '../views/Exceptions';
 
 const LayoutComponent = () => {
   const { Sider, Content, Header, Footer } = Layout;
@@ -122,7 +123,7 @@ const LayoutComponent = () => {
                 <Route path="/" element={<Navigate to="/requests" replace />} />
                 <Route path="/requests" element={<Requests socket={socket} />} />
                 <Route path="/requests/:id" element={<RequestDetails />} />
-                <Route path="/exceptions" element={<div>Exceptions component</div>} />
+                <Route path="/exceptions" element={<Exceptions />} />
                 <Route path="/queries" element={<div>Queries component</div>} />
               </Routes>
             </Content>

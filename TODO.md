@@ -1,0 +1,2 @@
+- Change all list fetching to socket based fethcing [BE && FE]
+- Only Details fetch through API??
