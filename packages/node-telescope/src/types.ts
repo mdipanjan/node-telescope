@@ -37,6 +37,9 @@ export interface ExceptionEntry extends BaseEntry {
     message: string;
     stack?: string;
     class?: string;
+    file?: string;
+    line?: number;
+    context?: { [key: string]: string };
   };
 }
 export interface LogEntry extends BaseEntry {

@@ -86,6 +86,8 @@ class TestServer {
       },
       app: this.app, // Provide the Express app
       server: this.server, // Provide the HTTP server
+      enableFileReading: true,
+      fileReadingEnvironments: ['development'],
     });
     this.app.use(this.telescope.middleware());
   }

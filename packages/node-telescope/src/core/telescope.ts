@@ -9,6 +9,9 @@ import { EntryType, EventTypes, ExceptionEntry, QueryEntry } from '../types';
 import mongoose from 'mongoose';
 import { MongoStorage } from '../storage/mongo-storage';
 import { getRequestId } from '../utils/async-context';
+import * as fs from 'fs';
+import { sanitizeCodeSnippet } from '../utils/utility';
+import { MongoQueries } from '../constants/constant';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -18,6 +21,8 @@ export interface TelescopeOptions {
   app?: Express;
   server?: HttpServer;
   enableQueryLogging?: boolean;
+  enableFileReading?: boolean;
+  fileReadingEnvironments?: string[];
 }
 
 export class Telescope {
@@ -37,6 +42,8 @@ export class Telescope {
       corsOptions: options.corsOptions || {},
       app: options.app,
       server: options.server,
+      enableFileReading: options.enableFileReading ?? false,
+      fileReadingEnvironments: options.fileReadingEnvironments ?? ['development'],
     };
 
     if (!this.options.storage) {
@@ -146,14 +153,43 @@ export class Telescope {
 
   public logException(error: Error | unknown): void {
     if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
+      let errorInfo: {
+        message: string;
+        stack?: string;
+        class: string;
+        file?: string;
+        line?: number;
+        context?: { [key: string]: string };
+      };
+
+      if (error instanceof Error) {
+        const stackLines = error.stack?.split('\n') || [];
+        const errorLine = stackLines[1] || '';
+        const match = errorLine.match(/\((.+):(\d+):(\d+)\)$/);
+
+        errorInfo = {
+          message: error.message,
+          stack: error.stack,
+          class: error.constructor.name,
+          file: match ? this.sanitizeFilePath(match[1]) : undefined,
+          line: match ? parseInt(match[2], 10) : undefined,
+        };
+        if (this.shouldReadFile()) {
+          errorInfo.context = this.getFileContext(
+            match ? match[1] : undefined,
+            match ? parseInt(match[2], 10) : undefined,
+          );
+        }
+      } else {
+        errorInfo = {
+          message: String(error),
+          class: 'UnknownError',
+        };
+      }
       const entry: Omit<ExceptionEntry, 'id'> = {
         type: EntryType.EXCEPTIONS,
         timestamp: new Date(),
-        exception: {
-          message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-          class: error instanceof Error ? error.constructor.name : 'UnknownError',
-        },
+        exception: errorInfo,
       };
 
       console.log('Logging exception:', JSON.stringify(entry, null, 2));
@@ -167,6 +203,43 @@ export class Telescope {
     }
   }
 
+  private shouldReadFile(): boolean | undefined {
+    return (
+      this.options.enableFileReading &&
+      this.options.fileReadingEnvironments &&
+      this.options.fileReadingEnvironments.includes(process.env.NODE_ENV || 'development')
+    );
+  }
+
+  private sanitizeFilePath(filePath: string): string {
+    // Remove sensitive parts of the file path
+    const projectRoot = process.cwd();
+    return filePath.replace(projectRoot, '[PROJECT_ROOT]');
+  }
+
+  private getFileContext(
+    filePath?: string,
+    lineNumber?: number,
+  ): { [key: string]: string } | undefined {
+    if (!this.shouldReadFile() || !filePath || !lineNumber) return undefined;
+
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const lines = fileContent.split('\n');
+      const start = Math.max(0, lineNumber - 3);
+      const end = Math.min(lines.length, lineNumber + 2);
+      const context: { [key: string]: string } = {};
+
+      for (let i = start; i < end; i++) {
+        context[`${i + 1}`] = sanitizeCodeSnippet(lines[i]);
+      }
+
+      return context;
+    } catch (error) {
+      console.error('Failed to read file for context:', error);
+      return undefined;
+    }
+  }
   private setupQueryLogging(): void {
     if (
       this.options.enableQueryLogging &&
@@ -177,18 +250,7 @@ export class Telescope {
 
       if (connection) {
         const queryPlugin = (schema: mongoose.Schema) => {
-          const methods = [
-            'find',
-            'findOne',
-            'findOneAndUpdate',
-            'updateOne',
-            'updateMany',
-            'deleteOne',
-            'deleteMany',
-            'aggregate',
-            'insertMany',
-            'create',
-          ];
+          const methods = MongoQueries;
 
           methods.forEach(method => {
             //@ts-ignore

@@ -28,6 +28,9 @@ const exceptionEntrySchema = new Schema({
     message: { type: String, required: true },
     stack: String, // No longer required
     class: String,
+    file: String,
+    line: Number,
+    context: Object,
   },
 });
 
