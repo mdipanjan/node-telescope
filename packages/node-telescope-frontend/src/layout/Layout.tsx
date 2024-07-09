@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import RequestDetails from '../views/RequestDetails';
 import Exceptions from '../views/Exceptions';
+import ExceptionDetails from '../views/ExceptionDetails';
 
 const LayoutComponent = () => {
   const { Sider, Content, Header, Footer } = Layout;
@@ -115,6 +116,7 @@ const LayoutComponent = () => {
                 <Route path="/requests" element={<Requests socket={socket} />} />
                 <Route path="/requests/:id" element={<RequestDetails socket={socket} />} />
                 <Route path="/exceptions" element={<Exceptions socket={socket} />} />
+                <Route path="/exceptions/:id" element={<ExceptionDetails socket={socket} />} />
 
                 {/* 
             <Route path="/queries" element={<Queries socket={socket} />} /> */}

@@ -46,7 +46,9 @@ const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
     {
       title: 'Action',
       key: 'action',
-      render: (text: string, record: any) => <Link to={`/requests`}>View Details</Link>,
+      render: (text: string, record: any) => (
+        <Link to={`/exceptions/${record?.id}`}>View Details</Link>
+      ),
     },
   ];
 
