@@ -80,24 +80,54 @@ export class Telescope {
   }
 
   private async handleSocketConnection(socket: Socket): Promise<void> {
-    const sendInitialEntries = async () => {
+    console.log('New socket connection established');
+
+    const sendInitialEntries = async (params: {
+      type: EntryType;
+      page: number;
+      perPage: number;
+    }) => {
+      console.log(`Fetching initial entries with params:`, params);
       try {
         const recentEntries = await this.storage.getEntries({
-          page: 1,
-          perPage: 20,
+          page: params.page,
+          perPage: params.perPage,
           sort: { timestamp: -1 },
-          type: EntryType.REQUESTS,
+          type: params.type,
         });
+        console.log(`Sending ${recentEntries.entries.length} initial entries`);
         socket.emit(EventTypes.INITIAL_ENTRIES, recentEntries);
       } catch (error) {
-        logger.error('Failed to send initial entries:', error);
+        console.error('Failed to send initial entries:', error);
         socket.emit('error', { message: 'Failed to fetch initial entries' });
       }
     };
-    socket.on('getInitialEntries', sendInitialEntries);
+
+    socket.on(
+      EventTypes.GET_INITIAL_ENTRIES,
+      (params: { type: EntryType; page: number; perPage: number }) => {
+        console.log(`Received request for initial entries:`, params);
+        sendInitialEntries(params);
+      },
+    );
 
     this.storage.on(EventTypes.NEW_ENTRY, (entry: unknown) => {
+      console.log('New entry detected, emitting to client');
       socket.emit(EventTypes.NEW_ENTRY, entry);
+    });
+
+    socket.on(EventTypes.GET_ENTRY_DETAILS, async ({ id }: { id: string }) => {
+      try {
+        const entry = await this.storage.getEntry(id);
+        if (entry) {
+          socket.emit(EventTypes.ENTRY_DETAILS, entry);
+        } else {
+          socket.emit('error', { message: 'Entry not found' });
+        }
+      } catch (error) {
+        logger.error('Failed to fetch entry details:', error);
+        socket.emit('error', { message: 'Failed to fetch entry details' });
+      }
     });
   }
 

@@ -70,5 +70,8 @@ export type Entry = RequestEntry | ExceptionEntry | QueryEntry | LogEntry | Even
 
 export enum EventTypes {
   NEW_ENTRY = 'newEntry',
+  GET_INITIAL_ENTRIES = 'getInitialEntries',
   INITIAL_ENTRIES = 'initialEntries',
+  GET_ENTRY_DETAILS = 'getEntryDetails',
+  ENTRY_DETAILS = 'entryDetails',
 }

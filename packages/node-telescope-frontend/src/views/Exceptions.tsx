@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Typography } from 'antd';
 import { red } from '@ant-design/colors';
-import { Entry } from '../types/GeneralTypes';
+import { Entry, RequestsProps } from '../types/GeneralTypes';
 
-import { Link } from 'react-router-dom';
+import { Link, RouteProps } from 'react-router-dom';
 import axios from 'axios';
+import { EntryType } from '../types/TelescopeEventTypes';
+import useTelescopeEntries from '../hooks/useTelescopeEntries';
 
 const { Text } = Typography;
 
-const Exceptions: React.FC = () => {
-  const [exceptions, setExceptions] = useState<Entry[]>([]);
+const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
+  const { entries, loading, pagination, handlePageChange } = useTelescopeEntries(
+    socket,
+    EntryType.EXCEPTIONS,
+  );
 
   useEffect(() => {
-    fetchExceptions();
-  }, []);
-
-  const fetchExceptions = async () => {
-    try {
-      const response: any = await axios.get('/telescope/api/entries?type=exceptions');
-      console.log('Fetched entries:', response);
-      setExceptions(response.data.entries);
-    } catch (error) {
-      console.error('Failed to fetch entries:', error);
-    }
-  };
+    console.log('Entries updated:', entries);
+  }, [entries]);
 
   const columns = [
     {
@@ -58,7 +53,7 @@ const Exceptions: React.FC = () => {
   return (
     <div>
       <Table
-        dataSource={exceptions}
+        dataSource={entries}
         columns={columns as any}
         rowKey="id"
         pagination={{ pageSize: 10 }}

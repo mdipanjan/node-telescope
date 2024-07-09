@@ -120,7 +120,19 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
       let findQuery: FilterQuery<Entry> = { ...filters };
 
       if (type) {
-        findQuery.type = Array.isArray(type) ? { $in: type } : type;
+        if (typeof type === 'string') {
+          findQuery.type = type;
+        } else if (Array.isArray(type)) {
+          findQuery.type = { $in: type };
+        }
+        //@ts-ignore
+        else if (typeof type === 'object' && type.type) {
+          //@ts-ignore
+
+          findQuery.type = type.type;
+        } else {
+          throw new Error('Invalid type parameter');
+        }
       }
 
       if (requestId) {

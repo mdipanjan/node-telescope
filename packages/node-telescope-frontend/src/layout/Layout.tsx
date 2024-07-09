@@ -14,18 +14,7 @@ const LayoutComponent = () => {
   const { isDarkMode } = useTheme();
   const { token } = theme.useToken();
 
-  const headerStyle: React.CSSProperties = {
-    textAlign: 'center',
-    height: 64,
-    paddingInline: 48,
-    lineHeight: '64px',
-  };
-
-  const footerStyle: React.CSSProperties = {
-    textAlign: 'center',
-  };
-
-  const [selectedMenu, setSelectedMenu] = useState('requests');
+  const [selectedMenu, setSelectedMenu] = useState('/requests');
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
@@ -35,19 +24,16 @@ const LayoutComponent = () => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Connected to Telescope');
-      message.success('Connected to Telescope server');
+      console.log('Connected to Telescope server');
     });
 
     newSocket.on('connect_error', error => {
       console.error('Connection error:', error);
-      message.error(`Failed to connect to Telescope server: ${error.message}`);
     });
 
     setSocket(newSocket);
 
     return () => {
-      console.log('Closing socket connection');
       newSocket.close();
     };
   }, []);
@@ -73,7 +59,7 @@ const LayoutComponent = () => {
           <Menu
             theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
-            defaultSelectedKeys={['/requests']}
+            defaultSelectedKeys={[selectedMenu]}
           >
             <Menu.Item
               key="/requests"
@@ -86,7 +72,7 @@ const LayoutComponent = () => {
             <Menu.Item
               key="/exceptions"
               icon={<CodeOutlined />}
-              onClick={() => setSelectedMenu('commands')}
+              onClick={() => setSelectedMenu('exceptions')}
             >
               <Link to="/exceptions">Exceptions</Link>
             </Menu.Item>
@@ -100,7 +86,12 @@ const LayoutComponent = () => {
           </Menu>
         </Sider>
         <Layout
-          style={{ marginLeft: 200, display: 'flex', flexDirection: 'column', height: '100vh' }}
+          style={{
+            marginLeft: 200,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+          }}
         >
           <Layout.Header
             style={{
@@ -122,9 +113,11 @@ const LayoutComponent = () => {
               <Routes>
                 <Route path="/" element={<Navigate to="/requests" replace />} />
                 <Route path="/requests" element={<Requests socket={socket} />} />
-                <Route path="/requests/:id" element={<RequestDetails />} />
-                <Route path="/exceptions" element={<Exceptions />} />
-                <Route path="/queries" element={<div>Queries component</div>} />
+                <Route path="/requests/:id" element={<RequestDetails socket={socket} />} />
+                <Route path="/exceptions" element={<Exceptions socket={socket} />} />
+
+                {/* 
+            <Route path="/queries" element={<Queries socket={socket} />} /> */}
               </Routes>
             </Content>
           </Layout>

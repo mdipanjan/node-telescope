@@ -1,35 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Card, Tag, Tabs, Button, Descriptions, Table, message } from 'antd';
+import {
+  Typography,
+  Card,
+  Tag,
+  Tabs,
+  Button,
+  Descriptions,
+  Table,
+  message,
+  Alert,
+  Spin,
+} from 'antd';
 import { CopyOutlined, ClockCircleOutlined, ApiOutlined, CodeOutlined } from '@ant-design/icons';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { formatBody } from '../utility/utility';
+import { RequestsProps } from '../types/GeneralTypes';
+import useEntryDetails from '../hooks/useEntryDetails';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
-const RequestDetails: React.FC = () => {
-  const { id } = useParams();
-  const [requestData, setRequestData] = useState<any>(null);
+const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
+  const { id } = useParams<{ id: string }>();
+  const { entry, loading, error, refetch } = useEntryDetails(socket, id!);
 
-  useEffect(() => {
-    if (id) {
-      getEntry(id).then(data => {
-        console.log('Entry:', data);
-        setRequestData(data);
-      });
-    }
-  }, [id]);
+  if (loading) {
+    return <Spin size="large" />;
+  }
 
-  async function getEntry(id: string) {
-    try {
-      const response = await axios.get(`/telescope/api/entries/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch entry:', error);
-    }
+  if (error) {
+    return <Alert message="Error" description={error} type="error" />;
+  }
+
+  if (!entry) {
+    return <Alert message="Entry not found" type="warning" />;
   }
 
   const copyToClipboard = (text: string) => {
@@ -54,9 +61,7 @@ const RequestDetails: React.FC = () => {
     </div>
   );
 
-  if (!requestData) return <div>Loading...</div>;
-
-  const { timestamp, duration, request, response } = requestData;
+  const { timestamp, duration, request, response } = entry as any;
 
   const headerColumns = [
     { title: 'Header', dataIndex: 'header', key: 'header' },

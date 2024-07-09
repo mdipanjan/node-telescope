@@ -1,4 +1,7 @@
+import { EntryType } from './TelescopeEventTypes';
+
 export type Entry = {
+  type: EntryType;
   id: string;
   verb: string;
   path: string;
