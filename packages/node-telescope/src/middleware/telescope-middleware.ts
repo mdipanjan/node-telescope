@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { Telescope } from '../core/telescope';
 import { EntryType, RequestEntry } from '../types';
-import { asyncLocalStorage, generateCurlCommand } from '../utils/async-context';
+import { asyncLocalStorage } from '../utils/async-context';
 import { v4 as uuidv4 } from 'uuid';
+import { generateCurlCommand } from '../utils/utility';
 
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
