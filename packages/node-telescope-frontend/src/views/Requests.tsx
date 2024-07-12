@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Tag, Typography, message } from 'antd';
+import { Button, Table, Tag, Typography, message } from 'antd';
 import { blue } from '@ant-design/colors';
 import { timeAgo } from '../utility/time';
 import { EntryType, EventTypes } from '../types/TelescopeEventTypes';
 import { Entry, RequestObj, RequestsProps, RequestType, ResponseObj } from '../types/GeneralTypes';
 import { getStatusColor } from '../utility/color';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
+import { EyeOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
 const Requests: React.FC<RequestsProps> = ({ socket }) => {
   const { entries } = useTelescopeEntries(socket, EntryType.REQUESTS);
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Entries updated:', entries);
@@ -64,7 +66,14 @@ const Requests: React.FC<RequestsProps> = ({ socket }) => {
       title: 'Action',
       key: 'action',
       render: (text: string, record: any) => (
-        <Link to={`/requests/${record.id}`}>View Details</Link>
+        <Button
+          icon={<EyeOutlined />}
+          onClick={() => {
+            navigate(`/requests/${record.id}`);
+          }}
+        >
+          View Details
+        </Button>
       ),
     },
   ];

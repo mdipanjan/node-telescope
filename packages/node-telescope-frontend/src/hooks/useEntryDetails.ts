@@ -1,21 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Entry } from '../types/GeneralTypes';
 import { EventTypes } from '../types/TelescopeEventTypes';
+import axios from 'axios';
+import { fetchEntry } from '../services/api';
 
 const useEntryDetails = (socket: any, id: string) => {
   const [entry, setEntry] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEntryDetails = useCallback(() => {
+  const fetchEntryDetails = useCallback(async () => {
     if (socket && socket.connected) {
       setLoading(true);
       setError(null);
       console.log(`Requesting details for entry ${id}`);
       socket.emit(EventTypes.GET_ENTRY_DETAILS, { id });
     } else {
-      setError('Socket not connected');
-      setLoading(false);
+      console.log(`Fetching details for entry ${id} via HTTP`);
+      try {
+        const response = await fetchEntry(id);
+        setEntry(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch entry details:', err);
+        setError('Failed to fetch entry details. Please try again.');
+        setLoading(false);
+      }
     }
   }, [socket, id]);
 

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Typography } from 'antd';
+import { Button, Table, Tag, Typography } from 'antd';
 import { red } from '@ant-design/colors';
 import { Entry, RequestsProps } from '../types/GeneralTypes';
 
-import { Link, RouteProps } from 'react-router-dom';
+import { Link, RouteProps, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { EntryType } from '../types/TelescopeEventTypes';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
+import { EyeOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -15,6 +16,7 @@ const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
     socket,
     EntryType.EXCEPTIONS,
   );
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Entries updated:', entries);
@@ -47,7 +49,15 @@ const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
       title: 'Action',
       key: 'action',
       render: (text: string, record: any) => (
-        <Link to={`/exceptions/${record?.id}`}>View Details</Link>
+        <Button
+          icon={<EyeOutlined />}
+          onClick={() => {
+            navigate(`/exceptions/${record.id}`);
+          }}
+        >
+          View Details
+        </Button>
+        // <Link to={`/exceptions/${record?.id}`}>View Details</Link>
       ),
     },
   ];

@@ -73,6 +73,7 @@ export class Telescope {
 
         this.setupSocketIO();
       }
+      app.get(`/telescope-config`, this.geRouteConfig.bind(this));
       app.get(`${this.options.routePrefix}/api/entries`, this.getEntries.bind(this));
       app.get(`${this.options.routePrefix}/api/entries/:id`, this.getEntry.bind(this));
     }
@@ -240,6 +241,7 @@ export class Telescope {
       return undefined;
     }
   }
+
   private setupQueryLogging(): void {
     if (
       this.options.enableQueryLogging &&
@@ -338,6 +340,12 @@ export class Telescope {
         }
       });
     }
+  }
+
+  private async geRouteConfig(_req: Request, res: Response): Promise<void> {
+    res.json({
+      routePrefix: this.options.routePrefix,
+    });
   }
 
   private async getEntries(req: Request, res: Response): Promise<void> {
