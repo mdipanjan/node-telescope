@@ -1,14 +1,58 @@
 import { EntryType } from './TelescopeEventTypes';
-
-export type Entry = {
+export interface BaseEntry {
+  id?: string;
   type: EntryType;
-  id: string;
-  verb: string;
-  path: string;
-  status: number;
+  timestamp: Date;
+}
+export interface RequestEntry extends BaseEntry {
+  type: EntryType.REQUESTS;
   duration: number;
-  happened: string;
-};
+  request: {
+    method: string;
+    url: string;
+    headers: Record<string, string>;
+    body: any;
+    ip: string;
+    requestId?: string;
+  };
+  response: {
+    statusCode: number;
+    headers: Record<string, string>;
+    body: string;
+  };
+  curlCommand?: string;
+  memoryUsage?: {
+    before: number;
+    after: number;
+    difference: number;
+  };
+}
+export interface ExceptionEntry extends BaseEntry {
+  type: EntryType.EXCEPTIONS;
+  exception: {
+    message: string;
+    stack?: string;
+    class?: string;
+    file?: string;
+    line?: number;
+    context?: { [key: string]: string };
+  };
+}
+
+export interface QueryEntry extends BaseEntry {
+  type: EntryType.QUERIES;
+  data: {
+    method: string;
+    query: string;
+    collection: string;
+    duration: number;
+    result?: string;
+    requestId?: string;
+  };
+}
+
+export type Entry = RequestEntry | ExceptionEntry | QueryEntry;
+
 export interface RequestType {
   entries: Entry[];
   pagination: {

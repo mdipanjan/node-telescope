@@ -21,6 +21,12 @@ const requestEntrySchema = new Schema({
     headers: Object,
     body: String,
   },
+  curlCommand: String,
+  memoryUsage: {
+    before: Number,
+    after: Number,
+    difference: Number,
+  },
 });
 
 const exceptionEntrySchema = new Schema({

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   Card,
@@ -10,22 +10,53 @@ import {
   message,
   Alert,
   Spin,
+  Collapse,
+  Space,
+  Row,
+  Statistic,
+  Col,
 } from 'antd';
-import { CopyOutlined, ClockCircleOutlined, ApiOutlined, CodeOutlined } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  ClockCircleOutlined,
+  ApiOutlined,
+  CodeOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  DashboardOutlined,
+  CloudOutlined,
+  CloudDownloadOutlined,
+} from '@ant-design/icons';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { formatBody } from '../utility/utility';
 import { RequestsProps } from '../types/GeneralTypes';
 import useEntryDetails from '../hooks/useEntryDetails';
+import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
+const { Panel } = Collapse;
+
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const hasMemoryUsage = (
+  entry: any,
+): entry is { memoryUsage: { difference: number; before: number; after: number } } => {
+  return entry && entry.memoryUsage && typeof entry.memoryUsage.difference === 'number';
+};
 
 const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
   const { id } = useParams<{ id: string }>();
   const { entry, loading, error, refetch } = useEntryDetails(socket, id!);
+  const [activeKeys, setActiveKeys] = useState<string[]>(['1', '2']);
 
   if (loading) {
     return <Spin size="large" />;
@@ -38,6 +69,9 @@ const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
   if (!entry) {
     return <Alert message="Entry not found" type="warning" />;
   }
+
+  const memoryDifference = hasMemoryUsage(entry) ? entry.memoryUsage.difference : 0;
+  const memoryIncreased = memoryDifference > 0;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -61,7 +95,7 @@ const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
     </div>
   );
 
-  const { timestamp, duration, request, response } = entry as any;
+  const { timestamp, duration, request, response, curlCommand } = entry as any;
 
   const headerColumns = [
     { title: 'Header', dataIndex: 'header', key: 'header' },
@@ -120,11 +154,7 @@ const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
             <Card title={<Title level={4}>Request Body</Title>} style={{ marginTop: 16 }}>
               <CodeBlock
                 code={formatBody(request.body)}
-                language={
-                  request.headers && request.headers['content-type']?.includes('json')
-                    ? 'json'
-                    : 'text'
-                }
+                language={request.headers['content-type']?.includes('json') ? 'json' : 'text'}
               />
             </Card>
           )}
@@ -155,15 +185,75 @@ const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
           <Card title={<Title level={4}>Response Body</Title>} style={{ marginTop: 16 }}>
             <CodeBlock
               code={formatBody(response.body)}
-              language={
-                response.headers && response.headers['content-type']?.includes('json')
-                  ? 'json'
-                  : 'text'
-              }
+              language={response.headers['content-type']?.includes('json') ? 'json' : 'text'}
             />
           </Card>
         </TabPane>
       </Tabs>
+      <Collapse
+        activeKey={activeKeys}
+        onChange={keys => setActiveKeys(keys as string[])}
+        style={{ marginTop: 16 }}
+      >
+        <Panel
+          header={
+            <Space>
+              <DashboardOutlined />
+              <span>Memory Usage</span>
+            </Space>
+          }
+          key="1"
+        >
+          <Row gutter={16}>
+            <Col span={8}>
+              <Statistic
+                title="Before Request"
+                value={formatBytes(hasMemoryUsage(entry) ? entry.memoryUsage.before : 0)}
+                prefix={<CloudOutlined />}
+              />
+            </Col>
+            <Col span={8}>
+              <Statistic
+                title="After Request"
+                value={formatBytes(hasMemoryUsage(entry) ? entry.memoryUsage.after : 0)}
+                prefix={<CloudDownloadOutlined />}
+              />
+            </Col>
+            <Col span={8}>
+              <Statistic
+                title="Difference"
+                value={formatBytes(Math.abs(memoryDifference))}
+                valueStyle={{ color: memoryIncreased ? '#cf1322' : '#3f8600' }}
+                prefix={memoryIncreased ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                suffix={memoryIncreased ? 'Increased' : 'Decreased'}
+              />
+            </Col>
+          </Row>
+        </Panel>
+
+        <Panel
+          header={
+            <Space>
+              <CodeOutlined />
+              <span>cURL Command</span>
+            </Space>
+          }
+          key="2"
+        >
+          <div style={{ position: 'relative' }}>
+            <Button
+              icon={<CopyOutlined />}
+              onClick={() => copyToClipboard(curlCommand)}
+              style={{ position: 'absolute', top: 5, right: 5, zIndex: 1 }}
+            >
+              Copy
+            </Button>
+            <SyntaxHighlighter language="bash" style={vs2015}>
+              {curlCommand}
+            </SyntaxHighlighter>
+          </div>
+        </Panel>
+      </Collapse>
     </div>
   );
 };

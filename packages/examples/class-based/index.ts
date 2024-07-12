@@ -88,6 +88,8 @@ class TestServer {
       server: this.server, // Provide the HTTP server
       enableFileReading: true,
       fileReadingEnvironments: ['development'],
+      includeCurlCommand: true,
+      recordMemoryUsage: true,
     });
     this.app.use(this.telescope.middleware());
   }

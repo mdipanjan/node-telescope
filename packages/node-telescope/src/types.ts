@@ -29,6 +29,12 @@ export interface RequestEntry extends BaseEntry {
     headers: Record<string, string>;
     body: string;
   };
+  curlCommand?: string;
+  memoryUsage?: {
+    before: number;
+    after: number;
+    difference: number;
+  };
 }
 
 export interface ExceptionEntry extends BaseEntry {

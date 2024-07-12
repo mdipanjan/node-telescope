@@ -23,6 +23,8 @@ export interface TelescopeOptions {
   enableQueryLogging?: boolean;
   enableFileReading?: boolean;
   fileReadingEnvironments?: string[];
+  includeCurlCommand?: boolean;
+  recordMemoryUsage?: boolean;
 }
 
 export class Telescope {
@@ -44,6 +46,8 @@ export class Telescope {
       server: options.server,
       enableFileReading: options.enableFileReading ?? false,
       fileReadingEnvironments: options.fileReadingEnvironments ?? ['development'],
+      includeCurlCommand: options.includeCurlCommand ?? false,
+      recordMemoryUsage: options.recordMemoryUsage ?? false,
     };
 
     if (!this.options.storage) {
@@ -73,6 +77,7 @@ export class Telescope {
 
         this.setupSocketIO();
       }
+      // To get the route config on the frontend
       app.get(`/telescope-config`, this.geRouteConfig.bind(this));
       app.get(`${this.options.routePrefix}/api/entries`, this.getEntries.bind(this));
       app.get(`${this.options.routePrefix}/api/entries/:id`, this.getEntry.bind(this));

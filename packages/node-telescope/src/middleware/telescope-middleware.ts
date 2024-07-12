@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Telescope } from '../core/telescope';
 import { EntryType, RequestEntry } from '../types';
-import { asyncLocalStorage } from '../utils/async-context';
+import { asyncLocalStorage, generateCurlCommand } from '../utils/async-context';
 import { v4 as uuidv4 } from 'uuid';
 
 export function telescopeMiddleware(telescope: Telescope) {
@@ -10,6 +10,7 @@ export function telescopeMiddleware(telescope: Telescope) {
     const requestId = uuidv4();
     asyncLocalStorage.run({ requestId }, () => {
       const startTime = Date.now();
+      const startMemory = process.memoryUsage().heapUsed;
       const chunks: Buffer[] = [];
       const originalWrite = res.write;
       const originalEnd = res.end;
@@ -39,6 +40,7 @@ export function telescopeMiddleware(telescope: Telescope) {
         }
         const responseBody = Buffer.concat(chunks).toString('utf8');
         const responseTime = Date.now() - startTime;
+        const endMemory = process.memoryUsage().heapUsed;
 
         const entry: Omit<RequestEntry, 'id'> = {
           type: EntryType.REQUESTS,
@@ -67,6 +69,14 @@ export function telescopeMiddleware(telescope: Telescope) {
             ),
             body: responseBody.substring(0, 1000), // Limit response body size
           },
+          ...(telescope.options.includeCurlCommand && { curlCommand: generateCurlCommand(req) }),
+          ...(telescope.options.recordMemoryUsage && {
+            memoryUsage: {
+              before: startMemory,
+              after: endMemory,
+              difference: endMemory - startMemory,
+            },
+          }),
         };
 
         if (telescope.options.watchedEntries.includes(EntryType.REQUESTS)) {
