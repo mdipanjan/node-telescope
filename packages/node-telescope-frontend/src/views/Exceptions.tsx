@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Button, Table, Tag, Typography } from 'antd';
 import { red } from '@ant-design/colors';
-import { Entry, RequestsProps } from '../types/GeneralTypes';
+import { RequestsProps } from '../types/GeneralTypes';
 
-import { Link, RouteProps, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { EntryType } from '../types/TelescopeEventTypes';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
 import { EyeOutlined } from '@ant-design/icons';

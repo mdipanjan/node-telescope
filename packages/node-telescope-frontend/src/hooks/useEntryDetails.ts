@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Entry } from '../types/GeneralTypes';
 import { EventTypes } from '../types/TelescopeEventTypes';
-import axios from 'axios';
 import { fetchEntry } from '../services/api';
 
 const useEntryDetails = (socket: any, id: string) => {

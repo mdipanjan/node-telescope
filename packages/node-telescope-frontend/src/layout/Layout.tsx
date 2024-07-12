@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Flex, Layout, Menu, message, theme } from 'antd';
+import { Flex, Layout, Menu, theme } from 'antd';
 import { DatabaseOutlined, CodeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import ThemeToggle from '../components/ThemeToggle';
 import Requests from '../views/Requests';
 import { io } from 'socket.io-client';
 import { useTheme } from '../context/ThemeContext';
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import RequestDetails from '../views/RequestDetails';
 import Exceptions from '../views/Exceptions';
 import ExceptionDetails from '../views/ExceptionDetails';
@@ -13,7 +13,7 @@ import Queries from '../views/Queries';
 import QueryDetails from '../views/QueryDetails';
 
 const LayoutComponent = () => {
-  const { Sider, Content, Header, Footer } = Layout;
+  const { Sider, Content } = Layout;
   const { isDarkMode } = useTheme();
   const { token } = theme.useToken();
 
@@ -124,7 +124,6 @@ const LayoutComponent = () => {
               </Routes>
             </Content>
           </Layout>
-          {/* <Footer style={footerStyle}>Footer</Footer> */}
         </Layout>
       </Layout>
     </Flex>

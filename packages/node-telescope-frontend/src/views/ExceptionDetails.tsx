@@ -1,28 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Typography,
-  Card,
-  Tag,
-  Tabs,
-  Button,
-  Descriptions,
-  Table,
-  message,
-  Alert,
-  Spin,
-} from 'antd';
-import { CopyOutlined, ClockCircleOutlined, ApiOutlined, CodeOutlined } from '@ant-design/icons';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import axios from 'axios';
+import React from 'react';
+import { Alert, Spin } from 'antd';
 import { useParams } from 'react-router-dom';
-import { formatBody } from '../utility/utility';
 import { RequestsProps } from '../types/GeneralTypes';
 import useEntryDetails from '../hooks/useEntryDetails';
 import ExceptionDetailComponent from '../components/ExceptionDetailComponent';
-
-const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 const ExceptionDetails: React.FC<RequestsProps> = ({ socket }) => {
   const { id } = useParams<{ id: string }>();

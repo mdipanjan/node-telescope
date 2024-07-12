@@ -1,4 +1,3 @@
-// src/services/configService.ts
 import axios from 'axios';
 
 interface TelescopeConfig {

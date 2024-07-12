@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Table, Tag, Typography, message } from 'antd';
+import React, { useEffect } from 'react';
+import { Button, Table, Tag, Typography } from 'antd';
 import { blue } from '@ant-design/colors';
 import { timeAgo } from '../utility/time';
-import { EntryType, EventTypes } from '../types/TelescopeEventTypes';
-import { Entry, RequestObj, RequestsProps, RequestType, ResponseObj } from '../types/GeneralTypes';
+import { EntryType } from '../types/TelescopeEventTypes';
+import { RequestObj, RequestsProps, ResponseObj } from '../types/GeneralTypes';
 import { getStatusColor } from '../utility/color';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
 import { EyeOutlined } from '@ant-design/icons';
 
