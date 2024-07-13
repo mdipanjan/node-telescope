@@ -133,9 +133,8 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
           findQuery.type = type;
         } else if (Array.isArray(type)) {
           findQuery.type = { $in: type };
-        }
-        //@ts-ignore
-        else if (typeof type === 'object' && type.type) {
+          //@ts-ignore
+        } else if (typeof type === 'object' && type.type) {
           //@ts-ignore
 
           findQuery.type = type.type;

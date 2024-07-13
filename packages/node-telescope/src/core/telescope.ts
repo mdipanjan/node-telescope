@@ -5,13 +5,14 @@ import { StorageInterface } from '../storage/storage-interface';
 import { logger } from '../utils/logger';
 import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
-import { EntryType, EventTypes, ExceptionEntry, QueryEntry } from '../types';
+import { EntryType, EventTypes, ExceptionEntry, QueryEntry, TelescopeDatabaseType } from '../types';
 import mongoose from 'mongoose';
 import { MongoStorage } from '../storage/mongo-storage';
 import { getRequestId } from '../utils/async-context';
 import * as fs from 'fs';
 import { sanitizeCodeSnippet } from '../utils/utility';
 import { MongoQueries } from '../constants/constant';
+import { PostgreSQLStorage } from '../storage/pg-storage';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -25,6 +26,7 @@ export interface TelescopeOptions {
   fileReadingEnvironments?: string[];
   includeCurlCommand?: boolean;
   recordMemoryUsage?: boolean;
+  databaseType: TelescopeDatabaseType;
 }
 
 export class Telescope {
@@ -48,6 +50,7 @@ export class Telescope {
       fileReadingEnvironments: options.fileReadingEnvironments ?? ['development'],
       includeCurlCommand: options.includeCurlCommand ?? false,
       recordMemoryUsage: options.recordMemoryUsage ?? false,
+      databaseType: options.databaseType,
     };
 
     if (!this.options.storage) {
@@ -145,6 +148,11 @@ export class Telescope {
   }
 
   private initialize(): void {
+    if (this.options.databaseType === TelescopeDatabaseType.POSTGRES) {
+      this.connect();
+      logger.info('Telescope storage connected and initialized');
+    }
+
     if (this.options.enableQueryLogging) {
       this.setupQueryLogging();
     }
@@ -246,91 +254,167 @@ export class Telescope {
       return undefined;
     }
   }
-
   private setupQueryLogging(): void {
     if (
       this.options.enableQueryLogging &&
       this.options.watchedEntries.includes(EntryType.QUERIES)
     ) {
-      const storage = this.storage as MongoStorage;
-      const connection = storage.connection;
+      if (this.storage instanceof MongoStorage) {
+        this.setupMongoQueryLogging();
+      } else if (this.storage instanceof PostgreSQLStorage) {
+        this.setupPostgresQueryLogging();
+      } else {
+        console.warn('Unsupported storage type for query logging');
+      }
+    }
+  }
 
-      if (connection) {
-        const queryPlugin = (schema: mongoose.Schema) => {
-          const methods = MongoQueries;
+  private setupMongoQueryLogging(): void {
+    const storage = this.storage as MongoStorage;
+    const connection = storage.connection;
 
-          methods.forEach(method => {
-            //@ts-ignore
-            schema.pre(method, function () {
-              //@ts-ignore
-
-              (this as any)._telescopeStartTime = Date.now();
-            });
-            //@ts-ignore
-
-            schema.post(method, function (this: any, result) {
-              const duration = Date.now() - (this._telescopeStartTime || Date.now());
-              const requestId = getRequestId();
-              const entry: QueryEntry = {
-                type: EntryType.QUERIES,
-                timestamp: new Date(this._telescopeStartTime),
-                data: {
-                  method,
-                  query: JSON.stringify(this.getQuery ? this.getQuery() : this),
-                  collection: this.model ? this.model.collection.name : this.collection.name,
-                  duration,
-                  result: result ? JSON.stringify(result).substring(0, 200) : undefined,
-                  requestId: requestId,
-                },
-              };
-
-              console.log('Query Logging:', entry);
-              storage
-                .storeEntry(entry as any)
-                .then(() => console.log('Query entry stored successfully'))
-                .catch(error => console.error('Failed to store query entry:', error));
-            });
+    if (connection) {
+      const queryPlugin = (schema: mongoose.Schema) => {
+        MongoQueries.forEach(method => {
+          //@ts-ignore
+          schema.pre(method, function (this: any) {
+            this._telescopeStartTime = Date.now();
           });
+          //@ts-ignore
 
-          // Add logging for 'save' method
-          schema.pre('save', function () {
-            (this as any)._telescopeStartTime = Date.now();
-          });
-
-          schema.post('save', function (this: any) {
+          schema.post(method, function (this: any, result: any) {
             const duration = Date.now() - (this._telescopeStartTime || Date.now());
             const requestId = getRequestId();
             const entry: QueryEntry = {
               type: EntryType.QUERIES,
               timestamp: new Date(this._telescopeStartTime),
               data: {
-                method: 'save',
-                query: JSON.stringify(this.toObject()),
-                collection: this.constructor.collection.name,
+                method,
+                query: JSON.stringify(this.getQuery ? this.getQuery() : this),
+                collection: this.model?.collection?.name || this.collection?.name || 'unknown',
                 duration,
-                result: JSON.stringify(this.toObject()).substring(0, 200),
+                result: result ? JSON.stringify(result).substring(0, 200) : undefined,
                 requestId: requestId,
               },
             };
 
-            console.log('Query Logging (Save):', entry);
+            console.log('Query Logging:', entry);
             storage
               .storeEntry(entry as any)
-              .then(() => console.log('Save query entry stored successfully'))
-              .catch(error => console.error('Failed to store save query entry:', error));
+              .then(() => console.log('Query entry stored successfully'))
+              .catch(error => console.error('Failed to store query entry:', error));
           });
-        };
+        });
 
-        // Apply the plugin to the connection
-        connection.plugin(queryPlugin);
+        // Handling 'save' method separately as it's a document method, not a query method
+        schema.pre('save', function (this: mongoose.Document) {
+          (this as any)._telescopeStartTime = Date.now();
+        });
 
-        console.log('Comprehensive query logging set up successfully');
-      } else {
-        console.warn('MongoDB connection not available for query logging');
-      }
+        schema.post('save', function (this: mongoose.Document) {
+          const duration = Date.now() - ((this as any)._telescopeStartTime || Date.now());
+          const requestId = getRequestId();
+          const entry: QueryEntry = {
+            type: EntryType.QUERIES,
+            timestamp: new Date((this as any)._telescopeStartTime),
+            data: {
+              method: 'save',
+              query: JSON.stringify(this.toObject()),
+              collection: (this.constructor as any).collection.name,
+              duration,
+              result: JSON.stringify(this.toObject()).substring(0, 200),
+              requestId: requestId,
+            },
+          };
+
+          console.log('Query Logging (Save):', entry);
+          storage
+            .storeEntry(entry as any)
+            .then(() => console.log('Save query entry stored successfully'))
+            .catch(error => console.error('Failed to store save query entry:', error));
+        });
+      };
+
+      connection.plugin(queryPlugin);
+      console.log('MongoDB query logging set up successfully');
+    } else {
+      console.warn('MongoDB connection not available for query logging');
     }
   }
 
+  private setupPostgresQueryLogging(): void {
+    if (!(this.storage instanceof PostgreSQLStorage)) {
+      console.warn('PostgreSQL storage not available for query logging');
+      return;
+    }
+
+    const pool = this.storage.getPool();
+
+    if (!pool) {
+      console.warn('PostgreSQL pool not available for query logging');
+      return;
+    }
+
+    if (!pool || typeof pool.query !== 'function') {
+      console.warn('PostgreSQL pool not properly initialized');
+      return;
+    }
+    console.log('PostgreSQL pool properly initialized, setting up query logging');
+
+    const originalQuery = pool.query;
+    pool.query = (...args: any[]): any => {
+      console.log('-==========================???pool???=========', pool);
+
+      const startTime = Date.now();
+      //@ts-ignore
+      const result = originalQuery.apply(pool, args);
+      //@ts-ignore
+
+      if (result instanceof Promise) {
+        console.log('-==========================result=========', result);
+
+        result
+          .then((queryResult: any) => {
+            //@ts-ignore
+            this.logQuery(startTime, args, queryResult);
+            console.log('-==========================queryResult=========', queryResult);
+          })
+          .catch((error: any) => {
+            console.error('Error in query:', error);
+          });
+      }
+
+      return result;
+    };
+
+    console.log('PostgreSQL query logging set up successfully');
+  }
+
+  private logQuery(startTime: number, args: any[], result: any): void {
+    console.log('-===================================', startTime);
+
+    const duration = Date.now() - startTime;
+    const queryText = typeof args[0] === 'string' ? args[0] : args[0].text;
+    const queryValues = args[1] || [];
+
+    const entry = {
+      type: 'queries',
+      timestamp: new Date(startTime),
+      data: {
+        method: 'query',
+        query: JSON.stringify({ text: queryText, values: queryValues }),
+        duration,
+        result: JSON.stringify(result).substring(0, 200),
+      },
+    };
+    console.log('-==========================entry=========', entry);
+
+    console.log('Query Logging:', entry);
+    this.storage
+      .storeEntry(entry as any)
+      .then(() => console.log('Query entry stored successfully'))
+      .catch(error => console.error('Failed to store query entry:', error));
+  }
   private setupExceptionLogging(): void {
     if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
       process.on('uncaughtException', (error: Error) => {

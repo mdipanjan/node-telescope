@@ -84,3 +84,10 @@ export enum EventTypes {
   GET_ENTRY_DETAILS = 'getEntryDetails',
   ENTRY_DETAILS = 'entryDetails',
 }
+export enum TelescopeDatabaseType {
+  MONGO = 'mongo',
+  POSTGRES = 'postgres',
+  SQLITE = 'sqlite',
+  MYSQL = 'mysql',
+  DYNAMODB = 'dynamodb',
+}

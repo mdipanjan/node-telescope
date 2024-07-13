@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"node-telescope": ["../../packages/node-telescope/src"]
+		},
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"module": "commonjs",
+		"target": "es2018",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"preserveSymlinks": true
+	},
+	"include": ["src/**/*"],
+	"references": [{ "path": "../../node-telescope" }]
+}
