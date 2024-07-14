@@ -1,36 +1,38 @@
 {
-  "name": "node-telescope-monorepo",
-  "version": "1.0.0",
-  "description": "Monorepo for node-telescope",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "dev": "lerna run dev --stream --parallel",
-    "lint": "lerna run lint --parallel",
-    "format": "lerna run format --parallel",
-    "clean": "lerna clean --yes && rm -rf node_modules",
-    "prepare": "husky install",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "cd packages/examples/class-based && npm run dev",
-    "start:frontend": "cd packages/node-telescope-frontend && npm start",
-    "type-check": "npm run type-check:backend && npm run type-check:frontend",
-    "type-check:backend": "tsc --project packages/node-telescope/tsconfig.json --noEmit",
-    "type-check:frontend": "tsc --project packages/node-telescope-frontend/tsconfig.json --noEmit"
-  },
-  "keywords": [],
-  "author": "mdipanjan",
-  "license": "ISC",
-  "devDependencies": {
-    "@commitlint/cli": "^17.6.5",
-    "@commitlint/config-conventional": "^17.6.5",
-    "concurrently": "^8.2.2",
-    "husky": "^8.0.3",
-    "lerna": "^6.6.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0"
-  },
-  "workspaces": [
-    "packages/*"
-  ]
+	"name": "node-telescope-monorepo",
+	"version": "1.0.0",
+	"description": "Monorepo for node-telescope",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"bootstrap": "lerna bootstrap",
+		"build": "lerna run build",
+		"dev": "lerna run dev --stream --parallel",
+		"lint": "lerna run lint --parallel",
+		"format": "lerna run format --parallel",
+		"clean": "lerna clean --yes && rm -rf node_modules",
+		"prepare": "husky install",
+		"start": "node scripts/start.js",
+		"start:class-based": "node scripts/start.js --class-based",
+		"start:class-based-pg": "node scripts/start.js --class-based-pg",
+		"start:frontend": "cd packages/node-telescope-frontend && npm start",
+		"type-check": "npm run type-check:backend && npm run type-check:frontend",
+		"type-check:backend": "tsc --project packages/node-telescope/tsconfig.json --noEmit",
+		"type-check:frontend": "tsc --project packages/node-telescope-frontend/tsconfig.json --noEmit"
+	},
+	"keywords": [],
+	"author": "mdipanjan",
+	"license": "ISC",
+	"devDependencies": {
+		"@commitlint/cli": "^17.6.5",
+		"@commitlint/config-conventional": "^17.6.5",
+		"concurrently": "^8.2.2",
+		"husky": "^8.0.3",
+		"lerna": "^6.6.2",
+		"@typescript-eslint/eslint-plugin": "^5.0.0",
+		"@typescript-eslint/parser": "^5.0.0",
+		"npm-run-all": "^4.1.5"
+	},
+	"workspaces": [
+		"packages/*"
+	]
 }

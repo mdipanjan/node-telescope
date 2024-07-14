@@ -68,9 +68,11 @@ export function telescopeMiddleware(telescope: Telescope) {
                 Array.isArray(value) ? value.join(', ') : value?.toString() || '',
               ]),
             ),
-            body: responseBody.substring(0, 1000), // Limit response body size
+            body: responseBody.substring(0, telescope.options.responseBodySizeLimit), // Limit response body size
           },
-          ...(telescope.options.includeCurlCommand && { curlCommand: generateCurlCommand(req) }),
+          ...(telescope.options.includeCurlCommand && {
+            curlCommand: generateCurlCommand(req),
+          }),
           ...(telescope.options.recordMemoryUsage && {
             memoryUsage: {
               before: startMemory,

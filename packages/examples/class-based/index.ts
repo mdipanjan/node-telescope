@@ -1,7 +1,7 @@
 // This is a test server to test the Telescope library
 import express, { Express, Request, Response, NextFunction } from 'express';
 import mongoose, { Schema, Document, Connection } from 'mongoose';
-import  { Telescope, MongoStorage, EntryType } from 'node-telescope';
+import { Telescope, MongoStorage, EntryType, TelescopeDatabaseType } from 'node-telescope';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { Server as HttpServer } from 'http';
@@ -27,7 +27,6 @@ class TestServer {
     this.app = express();
     this.server = new HttpServer(this.app);
     this.configureMiddleware();
-
   }
 
   private configureMiddleware(): void {
@@ -46,20 +45,18 @@ class TestServer {
     const MONGO_URI = process.env.DB_URI || '';
     try {
       this.mongoConnection = await mongoose.createConnection(MONGO_URI);
-      
+
       // Wait for the connection to be ready
       await new Promise<void>((resolve, reject) => {
         this.mongoConnection.once('connected', () => {
           console.log('MongoDB connection established successfully');
           resolve();
         });
-        this.mongoConnection.once('error', (err) => {
+        this.mongoConnection.once('error', err => {
           console.error('MongoDB connection error:', err);
           reject(err);
         });
       });
-
-      
     } catch (error) {
       console.error('Failed to configure MongoDB:', error);
       throw error;
@@ -68,12 +65,13 @@ class TestServer {
 
   private configureTelescope(): void {
     const dbName = process.env.DB_NAME || '';
+    const databaseType = TelescopeDatabaseType.MONGO;
 
     this.storage = new MongoStorage({
       connection: this.mongoConnection,
       dbName: dbName,
     });
-   
+
     this.telescope = new Telescope({
       storage: this.storage,
       watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
@@ -90,10 +88,11 @@ class TestServer {
       fileReadingEnvironments: ['development'],
       includeCurlCommand: true,
       recordMemoryUsage: true,
+      databaseType,
     });
     this.app.use(this.telescope.middleware());
   }
-  
+
   private async modelInit(): Promise<void> {
     const UserSchema = new Schema<IUser>({
       name: { type: String, required: true },
@@ -108,7 +107,6 @@ class TestServer {
     this.app.get('/', this.getHome.bind(this));
     this.app.post('/users', this.createUser.bind(this));
     this.app.get('/error', this.triggerError.bind(this));
-
   }
 
   public async initialize(): Promise<void> {
@@ -123,7 +121,7 @@ class TestServer {
       throw error;
     }
   }
-  
+
   private async triggerError(req: Request, res: Response): Promise<void> {
     throw new Error('This is a test error');
   }

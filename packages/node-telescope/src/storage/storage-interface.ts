@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { Entry, EntryType } from '../types';
 import { SortOrder } from 'mongoose';
+import { Pool } from 'pg';
 
 export interface QueryOptions {
   type?: EntryType;
@@ -27,4 +28,5 @@ export interface StorageInterface extends EventEmitter {
   getEntries(query: QueryOptions): Promise<{ entries: Entry[]; pagination: unknown }>;
   getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]>;
   prune(maxAge: number): Promise<void>;
+  getPool?(): Pool | null; // New method
 }
