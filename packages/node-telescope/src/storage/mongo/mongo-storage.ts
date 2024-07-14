@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, Connection } from 'mongoose';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { StorageInterface, AdvancedQueryOptions } from './storage-interface';
-import { logger } from '../utils/logger';
-import { Entry, EntryType, EventTypes } from '../types';
+import { StorageInterface, AdvancedQueryOptions } from '../storage-interface';
+import { logger } from '../../utils/logger';
+import { Entry, EntryType, EventTypes } from '../../types';
 import { FilterQuery } from 'mongoose';
 
 const requestEntrySchema = new Schema({

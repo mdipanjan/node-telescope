@@ -7,12 +7,12 @@ import { telescopeMiddleware } from '../middleware/telescope-middleware';
 import cors from 'cors';
 import { EntryType, EventTypes, ExceptionEntry, QueryEntry, TelescopeDatabaseType } from '../types';
 import mongoose from 'mongoose';
-import { MongoStorage } from '../storage/mongo-storage';
+import { MongoStorage } from '../storage/mongo/mongo-storage';
 import { getRequestId } from '../utils/async-context';
 import * as fs from 'fs';
 import { sanitizeCodeSnippet } from '../utils/utility';
 import { MongoQueries } from '../constants/constant';
-import { PostgreSQLStorage } from '../storage/pg-storage';
+import { PostgreSQLStorage } from '../storage/pg/pg-storage';
 
 export interface TelescopeOptions {
   storage: StorageInterface;
@@ -27,6 +27,8 @@ export interface TelescopeOptions {
   includeCurlCommand?: boolean;
   recordMemoryUsage?: boolean;
   databaseType: TelescopeDatabaseType;
+  responseBodySizeLimit?: number;
+  queryResultSizeLimit?: number;
 }
 
 export class Telescope {
@@ -51,6 +53,8 @@ export class Telescope {
       includeCurlCommand: options.includeCurlCommand ?? false,
       recordMemoryUsage: options.recordMemoryUsage ?? false,
       databaseType: options.databaseType,
+      responseBodySizeLimit: options.responseBodySizeLimit || 2000,
+      queryResultSizeLimit: options.queryResultSizeLimit || 2000,
     };
 
     if (!this.options.storage) {
@@ -272,7 +276,7 @@ export class Telescope {
   private setupMongoQueryLogging(): void {
     const storage = this.storage as MongoStorage;
     const connection = storage.connection;
-
+    const queryResultSizeLimit = this.options.queryResultSizeLimit;
     if (connection) {
       const queryPlugin = (schema: mongoose.Schema) => {
         MongoQueries.forEach(method => {
@@ -322,7 +326,7 @@ export class Telescope {
               query: JSON.stringify(this.toObject()),
               collection: (this.constructor as any).collection.name,
               duration,
-              result: JSON.stringify(this.toObject()).substring(0, 200),
+              result: JSON.stringify(this.toObject()).substring(0, queryResultSizeLimit),
               requestId: requestId,
             },
           };
@@ -343,56 +347,56 @@ export class Telescope {
   }
 
   private setupPostgresQueryLogging(): void {
+    console.log('Setting up PostgreSQL query logging');
     if (!(this.storage instanceof PostgreSQLStorage)) {
       console.warn('PostgreSQL storage not available for query logging');
       return;
     }
 
     const pool = this.storage.getPool();
-
-    if (!pool) {
-      console.warn('PostgreSQL pool not available for query logging');
-      return;
-    }
+    console.log('Original pool:', pool);
 
     if (!pool || typeof pool.query !== 'function') {
       console.warn('PostgreSQL pool not properly initialized');
       return;
     }
+
     console.log('PostgreSQL pool properly initialized, setting up query logging');
 
     const originalQuery = pool.query;
-    pool.query = (...args: any[]): any => {
-      console.log('-==========================???pool???=========', pool);
+    console.log('Original query method:', originalQuery);
 
+    const interceptedQuery = (...args: any[]): any => {
+      console.log('Intercepted query call with args:', args);
       const startTime = Date.now();
       //@ts-ignore
       const result = originalQuery.apply(pool, args);
       //@ts-ignore
 
       if (result instanceof Promise) {
-        console.log('-==========================result=========', result);
-
         result
           .then((queryResult: any) => {
-            //@ts-ignore
+            console.log('Query result:', queryResult);
             this.logQuery(startTime, args, queryResult);
-            console.log('-==========================queryResult=========', queryResult);
           })
           .catch((error: any) => {
             console.error('Error in query:', error);
           });
+      } else {
+        console.log('Query result is not a Promise:', result);
       }
 
       return result;
     };
 
+    pool.query = interceptedQuery;
+    this.storage.setPool(pool);
+
+    console.log('Intercepted pool:', pool);
     console.log('PostgreSQL query logging set up successfully');
   }
 
   private logQuery(startTime: number, args: any[], result: any): void {
-    console.log('-===================================', startTime);
-
     const duration = Date.now() - startTime;
     const queryText = typeof args[0] === 'string' ? args[0] : args[0].text;
     const queryValues = args[1] || [];
@@ -404,10 +408,9 @@ export class Telescope {
         method: 'query',
         query: JSON.stringify({ text: queryText, values: queryValues }),
         duration,
-        result: JSON.stringify(result).substring(0, 200),
+        result: JSON.stringify(result).substring(0, this.options.queryResultSizeLimit),
       },
     };
-    console.log('-==========================entry=========', entry);
 
     console.log('Query Logging:', entry);
     this.storage
@@ -415,6 +418,7 @@ export class Telescope {
       .then(() => console.log('Query entry stored successfully'))
       .catch(error => console.error('Failed to store query entry:', error));
   }
+
   private setupExceptionLogging(): void {
     if (this.options.watchedEntries.includes(EntryType.EXCEPTIONS)) {
       process.on('uncaughtException', (error: Error) => {
