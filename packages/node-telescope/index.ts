@@ -6,7 +6,7 @@ import { logger } from './src/utils/logger';
 import { EntryType, TelescopeDatabaseType } from './src/types';
 import { PostgreSQLStorage } from './src/storage/pg/pg-storage';
 // Re-export types
-export type { TelescopeOptions } from './src/core/telescope';
+export type { TelescopeOptions } from './src/core/telescope-options';
 export type { Request, Response } from 'express';
 
 const telescope = {
