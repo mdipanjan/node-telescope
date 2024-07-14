@@ -18,7 +18,6 @@ export function setupMongoQueryLogging(telescope: Telescope): void {
           this._telescopeStartTime = Date.now();
         });
         // @ts-ignore
-
         schema.post(method, function (this: any, result: any) {
           const duration = Date.now() - (this._telescopeStartTime || Date.now());
           const requestId = getRequestId();
