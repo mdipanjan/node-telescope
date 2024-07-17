@@ -19,21 +19,17 @@ export function telescopeMiddleware(telescope: Telescope) {
       res.write = function (
         this: Response,
         chunk: any,
-        //@ts-ignore
         encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
-        //@ts-ignore
         cb?: (error: Error | null) => void,
       ): boolean {
         chunks.push(Buffer.from(chunk));
-        return originalWrite.apply(this, arguments as any);
+        return originalWrite.call(this, chunk, encodingOrCallback as any, cb as any);
       };
 
       res.end = function (
         this: Response,
         chunk?: any,
-        //@ts-ignore
         encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
-        //@ts-ignore
         cb?: () => void,
       ): Response {
         if (chunk) {
@@ -68,7 +64,7 @@ export function telescopeMiddleware(telescope: Telescope) {
                 Array.isArray(value) ? value.join(', ') : value?.toString() || '',
               ]),
             ),
-            body: responseBody.substring(0, telescope.options.responseBodySizeLimit), // Limit response body size
+            body: responseBody.substring(0, telescope.options.responseBodySizeLimit || 2000),
           },
           ...(telescope.options.includeCurlCommand && {
             curlCommand: generateCurlCommand(req),
@@ -86,7 +82,7 @@ export function telescopeMiddleware(telescope: Telescope) {
           telescope.storage.storeEntry(entry);
         }
 
-        return originalEnd.apply(this, arguments as any);
+        return originalEnd.call(this, chunk, encodingOrCallback as any, cb);
       };
 
       next();

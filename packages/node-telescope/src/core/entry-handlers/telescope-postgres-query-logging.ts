@@ -1,10 +1,12 @@
 import { PostgreSQLStorage } from '../../storage/pg/pg-storage';
 import { Telescope } from '../telescope';
 import { logQuery } from './telescope-query-logging';
+import { Pool, QueryResult, QueryResultRow, QueryConfig } from 'pg';
 
 export function setupPostgresQueryLogging(telescope: Telescope): void {
   console.log('Setting up PostgreSQL query logging');
-  if (!(telescope.storage instanceof PostgreSQLStorage)) {
+
+  if (!isPostgreSQLStorage(telescope.storage)) {
     console.warn('PostgreSQL storage not available for query logging');
     return;
   }
@@ -19,36 +21,60 @@ export function setupPostgresQueryLogging(telescope: Telescope): void {
 
   console.log('PostgreSQL pool properly initialized, setting up query logging');
 
-  const originalQuery = pool.query;
+  const originalQuery = pool.query.bind(pool);
   console.log('Original query method:', originalQuery);
 
-  const interceptedQuery = (...args: any[]): any => {
-    console.log('Intercepted query call with args:', args);
+  const interceptedQuery = function (
+    this: Pool,
+    queryTextOrConfig: string | QueryConfig<any[]>,
+    values?: any[] | ((err: Error, result: QueryResult<QueryResultRow>) => void),
+    callback?: (err: Error, result: QueryResult<QueryResultRow>) => void,
+  ): Promise<QueryResult> | void {
+    console.log('Intercepted query call with args:', queryTextOrConfig, values, callback);
     const startTime = Date.now();
-    //@ts-ignore
 
-    const result = originalQuery.apply(pool, args);
-    //@ts-ignore
+    const queryResult = originalQuery.call(
+      this,
+      queryTextOrConfig as any,
+      values as never,
+      callback as never,
+    );
 
-    if (result instanceof Promise) {
-      result
-        .then((queryResult: any) => {
-          console.log('Query result:', queryResult);
-          logQuery(telescope, startTime, args, queryResult);
+    if (isPromise(queryResult)) {
+      return queryResult
+        .then(result => {
+          console.log('Query result:', result);
+          logQuery(telescope, startTime, [queryTextOrConfig, values], result);
+          return result;
         })
         .catch((error: any) => {
           console.error('Error in query:', error);
+          throw error;
         });
     } else {
-      console.log('Query result is not a Promise:', result);
+      console.log('Query result is not a Promise:', queryResult);
+      return queryResult;
     }
-
-    return result;
   };
 
-  pool.query = interceptedQuery;
+  // Preserve the original method's properties
+  Object.assign(interceptedQuery, originalQuery);
+
+  // Type assertion to match the complex overloaded signature
+  (pool as any).query = interceptedQuery as typeof pool.query;
+
   telescope.storage.setPool(pool);
 
   console.log('Intercepted pool:', pool);
   console.log('PostgreSQL query logging set up successfully');
+}
+
+function isPostgreSQLStorage(storage: unknown): storage is PostgreSQLStorage {
+  return (
+    typeof storage === 'object' && storage !== null && 'getPool' in storage && 'setPool' in storage
+  );
+}
+
+function isPromise(value: unknown): value is Promise<any> {
+  return value instanceof Promise;
 }

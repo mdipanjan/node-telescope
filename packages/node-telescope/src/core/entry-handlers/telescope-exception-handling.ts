@@ -12,7 +12,7 @@ export function setupExceptionLogging(telescope: Telescope): void {
       logException(telescope, error);
     });
 
-    process.on('unhandledRejection', (reason: any) => {
+    process.on('unhandledRejection', (reason: unknown) => {
       if (reason instanceof Error) {
         logException(telescope, reason);
       } else {
@@ -42,13 +42,13 @@ export function logException(telescope: Telescope, error: Error | unknown): void
   }
 }
 
-function getErrorInfo(telescope: Telescope, error: Error | unknown): any {
+function getErrorInfo(telescope: Telescope, error: Error | unknown): ExceptionEntry['exception'] {
   if (error instanceof Error) {
     const stackLines = error.stack?.split('\n') || [];
     const errorLine = stackLines[1] || '';
     const match = errorLine.match(/\((.+):(\d+):(\d+)\)$/);
 
-    const errorInfo: any = {
+    const errorInfo: ExceptionEntry['exception'] = {
       message: error.message,
       stack: error.stack,
       class: error.constructor.name,

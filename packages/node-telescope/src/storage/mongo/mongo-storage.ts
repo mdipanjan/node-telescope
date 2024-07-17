@@ -126,17 +126,14 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
       } = queryOptions;
 
       const skip = (page - 1) * perPage;
-      let findQuery: FilterQuery<Entry> = { ...filters };
+      const findQuery: FilterQuery<Entry> = { ...filters };
 
       if (type) {
         if (typeof type === 'string') {
           findQuery.type = type;
         } else if (Array.isArray(type)) {
           findQuery.type = { $in: type };
-          //@ts-ignore
-        } else if (typeof type === 'object' && type.type) {
-          //@ts-ignore
-
+        } else if (typeof type === 'object' && 'type' in type) {
           findQuery.type = type.type;
         } else {
           throw new Error('Invalid type parameter');
@@ -180,6 +177,7 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
       throw error;
     }
   }
+
   // this could be used when user comes to request for recent entries
   async getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]> {
     try {

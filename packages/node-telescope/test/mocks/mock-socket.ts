@@ -4,7 +4,7 @@ export class MockSocket extends EventEmitter {
   public id: string;
   public handshake: { headers: Record<string, string> };
 
-  constructor(id: string = 'mock-socket-id') {
+  constructor(id = 'mock-socket-id') {
     super();
     this.id = id;
     this.handshake = { headers: {} };

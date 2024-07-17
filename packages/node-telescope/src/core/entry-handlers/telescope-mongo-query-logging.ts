@@ -9,16 +9,17 @@ export function setupMongoQueryLogging(telescope: Telescope): void {
   const storage = telescope.storage as MongoStorage;
   const connection = storage.connection;
 
-  const queryResultSizeLimit: any = telescope.options.queryResultSizeLimit;
+  const queryResultSizeLimit = telescope.options.queryResultSizeLimit as number;
   if (connection) {
     const queryPlugin = (schema: mongoose.Schema) => {
       MongoQueries.forEach(method => {
-        // @ts-ignore
-        schema.pre(method, function (this: any) {
+        // Use type assertion here
+        (schema as any).pre(method, function (this: any) {
           this._telescopeStartTime = Date.now();
         });
-        // @ts-ignore
-        schema.post(method, function (this: any, result: any) {
+
+        // Use type assertion here as well
+        (schema as any).post(method, function (this: any, result: any) {
           const duration = Date.now() - (this._telescopeStartTime || Date.now());
           const requestId = getRequestId();
           const entry: QueryEntry = {
@@ -38,7 +39,7 @@ export function setupMongoQueryLogging(telescope: Telescope): void {
 
           console.log('Query Logging:', entry);
           storage
-            .storeEntry(entry as any)
+            .storeEntry(entry)
             .then(() => console.log('Query entry stored successfully'))
             .catch(error => console.error('Failed to store query entry:', error));
         });
@@ -81,7 +82,7 @@ function setupSaveLogging(
 
     console.log('Query Logging (Save):', entry);
     storage
-      .storeEntry(entry as any)
+      .storeEntry(entry)
       .then(() => console.log('Save query entry stored successfully'))
       .catch(error => console.error('Failed to store save query entry:', error));
   });

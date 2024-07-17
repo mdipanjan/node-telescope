@@ -3,9 +3,9 @@ import { EventEmitter } from 'events';
 export class MockRequest {
   public headers: Record<string, string> = {};
   public body: any = {};
-  public method: string = 'GET';
-  public url: string = '/';
-  public ip: string = '127.0.0.1';
+  public method = 'GET';
+  public url = '/';
+  public ip = '127.0.0.1';
 
   constructor(options?: Partial<MockRequest>) {
     Object.assign(this, options);
@@ -13,7 +13,7 @@ export class MockRequest {
 }
 
 export class MockResponse extends EventEmitter {
-  public statusCode: number = 200;
+  public statusCode = 200;
   private _headers: Record<string, string> = {};
   private _body: any = null;
 

@@ -20,7 +20,7 @@ export interface RequestEntry extends BaseEntry {
     method: string;
     url: string;
     headers: Record<string, string>;
-    body: any;
+    body: unknown;
     ip: string;
     requestId?: string;
   };

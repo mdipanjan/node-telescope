@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { Entry, EntryType } from '../types';
-import { SortOrder } from 'mongoose';
 import { Pool } from 'pg';
 
 export interface QueryOptions {
@@ -13,12 +12,12 @@ export interface QueryOptions {
 export interface AdvancedQueryOptions {
   page?: number;
   perPage?: number;
-  type?: EntryType | EntryType[];
+  type?: string | string[] | { type: string };
   requestId?: string;
-  startDate?: Date | string;
-  endDate?: Date | string;
-  sort?: { [key: string]: SortOrder };
-  [key: string]: any;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  sort?: { [key: string]: 1 | -1 };
+  [key: string]: any; // for additional filters
 }
 
 export interface StorageInterface extends EventEmitter {

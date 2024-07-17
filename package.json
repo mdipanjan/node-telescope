@@ -17,11 +17,12 @@
 		"start:frontend": "cd packages/node-telescope-frontend && npm start",
 		"type-check": "npm run type-check:backend && npm run type-check:frontend",
 		"type-check:backend": "tsc --project packages/node-telescope/tsconfig.json --noEmit",
-		"type-check:frontend": "tsc --project packages/node-telescope-frontend/tsconfig.json --noEmit"
+		"type-check:frontend": "tsc --project packages/node-telescope-frontend/tsconfig.json --noEmit",
+		"pre-commit": "npm-run-all --parallel type-check lint format"
 	},
 	"keywords": [],
 	"author": "mdipanjan",
-	"license": "ISC",
+	"license": "MIT",
 	"devDependencies": {
 		"@commitlint/cli": "^17.6.5",
 		"@commitlint/config-conventional": "^17.6.5",

@@ -10,8 +10,6 @@ dotenv.config();
 async function createTestServer() {
 	const app: Express = express();
 	const server: HttpServer = createServer(app);
-	let telescope: Telescope;
-	let storage: MongoStorage;
 
 	// Middleware
 	app.use(express.json());
@@ -23,12 +21,12 @@ async function createTestServer() {
 
 	// Configure Telescope
 	const mongoConnection = mongoose.connection;
-	storage = new MongoStorage({
+	const storage = new MongoStorage({
 		connection: mongoConnection,
 		dbName: process.env.DB_NAME || 'telescope',
 	});
 
-	telescope = new Telescope({
+	const telescope = new Telescope({
 		storage: storage,
 		watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
 		enableQueryLogging: true,
@@ -42,16 +40,16 @@ async function createTestServer() {
 	app.use(telescope.middleware());
 
 	// Routes
-	app.get('/', (req: Request, res: Response) => {
+	app.get('/', (_req: Request, res: Response) => {
 		res.send('Hello World! This is the TestServer.');
 	});
 
-	app.get('/error', (req: Request, res: Response) => {
+	app.get('/error', (_req: Request, _res: Response) => {
 		throw new Error('This is a test error');
 	});
 
 	// Error handling
-	app.use((err: Error, req: Request, res: Response, next: Function) => {
+	app.use((err: Error, _req: Request, res: Response) => {
 		console.error(err.stack);
 		res.status(500).send('Something broke!');
 	});

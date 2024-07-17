@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "A logging and monitoring library for node.js",
   "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "clean": "rimraf dist && echo 'Cleaned dist folder'",
@@ -28,7 +31,13 @@
     "nodejs",
     "monitoring",
     "debugging",
-    "telescope"
+    "telescope",
+    "logging",
+    "performance",
+    "express",
+    "middleware",
+    "database",
+    "query-logging"
   ],
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -41,7 +50,8 @@
   },
   "peerDependencies": {
     "mongoose": "^8.4.4",
-    "pg": "^8.7.1"
+    "pg": "^8.7.1",
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -72,5 +82,13 @@
     "@babel/plugin-transform-modules-commonjs": "^7.14.0",
     "@babel/preset-env": "^7.14.0",
     "babel-jest": "^27.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdipanjan/node-telescope.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mdipanjan/node-telescope/issues"
+  },
+  "homepage": "https://github.com/mdipanjan/node-telescope#readme"
 }
