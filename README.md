@@ -143,8 +143,8 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 🙏 Acknowledgements
 
-Special thanks to all the contributors who have helped shape Node Telescope.
+This project was inspired by [Laravel Telescope](https://laravel.com/docs/telescope), a powerful debug assistant for the Laravel framework.
 
 ---
 
-Built with ❤️ by [Your Name/Organization]
+Built with ❤️ by [mdipanjan](https://github.com/mdipanjan)
