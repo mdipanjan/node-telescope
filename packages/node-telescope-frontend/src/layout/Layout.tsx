@@ -13,36 +13,16 @@ import Queries from '../views/Queries';
 import QueryDetails from '../views/QueryDetails';
 import logo from '../logo.svg';
 import { useRoutePrefix } from '../context/RoutePrefixContext';
+import { useSocket } from '../hooks/useSocket';
 
 const LayoutComponent = () => {
   const { Sider, Content } = Layout;
   const { isDarkMode } = useTheme();
   const { token } = theme.useToken();
   const routePrefix = useRoutePrefix();
+  const socket = useSocket(routePrefix);
 
   const [selectedMenu, setSelectedMenu] = useState('/requests');
-  const [socket, setSocket] = useState<any>(null);
-
-  useEffect(() => {
-    const newSocket = io('http://localhost:4000', {
-      path: '/telescope/socket.io',
-      transports: ['websocket', 'polling'],
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to Telescope server');
-    });
-
-    newSocket.on('connect_error', error => {
-      console.error('Connection error:', error);
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.close();
-    };
-  }, []);
 
   return (
     <Flex gap="middle" wrap>

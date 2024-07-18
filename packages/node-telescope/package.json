@@ -1,6 +1,6 @@
 {
   "name": "node-telescope",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A logging and monitoring library for node.js",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -11,13 +11,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "rimraf dist frontend-build",
-    "prebuild": "npm run clean",
-    "build": "tsc && npm run build:frontend",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc && npm run build:frontend",
     "build:frontend": "cd ../node-telescope-frontend && npm run build && node ../node-telescope/scripts/copy-frontend.js",
-    "copy-frontend": "node scripts/copy-frontend.js",
-    "prepublishOnly": "npm run build && npm run copy-frontend-to-dist",
-    "copy-frontend-to-dist": "cp -r frontend-build dist/frontend-build",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",

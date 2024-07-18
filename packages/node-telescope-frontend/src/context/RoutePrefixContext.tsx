@@ -1,9 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
-const RoutePrefixContext = createContext('/telescope');
+const RoutePrefixContext = createContext('');
 
 export const RoutePrefixProvider = ({ children }: { children: React.ReactNode }) => {
-  const [routePrefix, setRoutePrefix] = useState('/telescope');
+  const [routePrefix, setRoutePrefix] = useState('');
 
   useEffect(() => {
     fetch('/telescope-config')
