@@ -18,7 +18,7 @@ Node Telescope is a monorepo managed with Lerna. It consists of the following pa
 
 ### Design Decisions
 
-When we make a significant decision in how we maintain the project and what we can or cannot support, we will document it in the [project wiki](https://github.com/your-username/node-telescope/wiki). If you have a question around how we do things, check to see if it is documented there. If it is not documented there, please open a new issue and ask your question.
+When we make a significant decision in how we maintain the project and what we can or cannot support, we will document it in the [project wiki](https://github.com/mdipanjan/node-telescope/wiki). If you have a question around how we do things, check to see if it is documented there. If it is not documented there, please open a new issue and ask your question.
 
 ## How Can I Contribute?
 
@@ -28,9 +28,9 @@ This section guides you through submitting a bug report for Node Telescope. Foll
 
 **Before Submitting A Bug Report:**
 
-- Check the [debugging guide](https://github.com/your-username/node-telescope/wiki/Debugging).
-- Check the [FAQs on the wiki](https://github.com/your-username/node-telescope/wiki/FAQs) for a list of common questions and problems.
-- Perform a [cursory search](https://github.com/your-username/node-telescope/issues) to see if the problem has already been reported. If it has and the issue is still open, add a comment to the existing issue instead of opening a new one.
+- Check the [debugging guide](https://github.com/mdipanjan/node-telescope/wiki/Debugging).
+- Check the [FAQs on the wiki](https://github.com/mdipanjan/node-telescope/wiki/FAQs) for a list of common questions and problems.
+- Perform a [cursory search](https://github.com/mdipanjan/node-telescope/issues) to see if the problem has already been reported. If it has and the issue is still open, add a comment to the existing issue instead of opening a new one.
 
 **How Do I Submit A (Good) Bug Report?**
 
@@ -50,7 +50,7 @@ This section guides you through submitting an enhancement suggestion for Node Te
 **Before Submitting An Enhancement Suggestion:**
 
 - Check if there's already [a package](https://www.npmjs.com/search?q=keywords:telescope) which provides that enhancement.
-- Perform a [cursory search](https://github.com/your-username/node-telescope/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
+- Perform a [cursory search](https://github.com/mdipanjan/node-telescope/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
 
 **How Do I Submit A (Good) Enhancement Suggestion?**
 
@@ -67,12 +67,12 @@ Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com
 
 Unsure where to begin contributing to Node Telescope? You can start by looking through these `beginner` and `help-wanted` issues:
 
-- [Beginner issues](https://github.com/your-username/node-telescope/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) - issues which should only require a few lines of code, and a test or two.
-- [Help wanted issues](https://github.com/your-username/node-telescope/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) - issues which should be a bit more involved than `beginner` issues.
+- [Beginner issues](https://github.com/mdipanjan/node-telescope/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) - issues which should only require a few lines of code, and a test or two.
+- [Help wanted issues](https://github.com/mdipanjan/node-telescope/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) - issues which should be a bit more involved than `beginner` issues.
 
 ### Pull Requests
 
-- Fill in [the required template](PULL_REQUEST_TEMPLATE.md)
+- Fill in [the required template](PULL_REQUEST_GUIDE.md)
 - Do not include issue numbers in the PR title
 - Follow the [JavaScript](#javascript-styleguide) styleguide.
 - Include thoughtfully-worded, well-structured [Jasmine](https://jasmine.github.io/) specs in the `./spec` folder. Run them using `npm test`.

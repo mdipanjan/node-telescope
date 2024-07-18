@@ -10,6 +10,7 @@ import { setupExpressMiddleware, setupRoutes } from './base/telescope-express-se
 import { logException, setupExceptionLogging } from './entry-handlers/telescope-exception-handling';
 import express from 'express';
 import { setupQueryLogging } from './entry-handlers/telescope-query-logging';
+import { serveFrontend } from './serve-frontend';
 
 export class Telescope {
   public options: TelescopeOptions;
@@ -59,6 +60,7 @@ export class Telescope {
       setupExpressMiddleware(app, this.options);
       setupRoutes(app, this);
       this.setupSocketServer(server);
+      serveFrontend(app, this.options.routePrefix);
     }
   }
 

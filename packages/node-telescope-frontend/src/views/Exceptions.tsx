@@ -7,17 +7,17 @@ import { useNavigate } from 'react-router-dom';
 import { EntryType } from '../types/TelescopeEventTypes';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
 import { EyeOutlined } from '@ant-design/icons';
+import { useRoutePrefix } from '../context/RoutePrefixContext';
 
 const { Text } = Typography;
 
 const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
-  const { entries, loading, pagination, handlePageChange } = useTelescopeEntries(
-    socket,
-    EntryType.EXCEPTIONS,
-  );
+  const { entries } = useTelescopeEntries(socket, EntryType.EXCEPTIONS);
   const navigate = useNavigate();
+  const routePrefix = useRoutePrefix();
 
   useEffect(() => {
+    console.log('Exceptions loaded:', entries);
     console.log('Entries updated:', entries);
   }, [entries]);
 
@@ -51,7 +51,7 @@ const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
         <Button
           icon={<EyeOutlined />}
           onClick={() => {
-            navigate(`/exceptions/${record.id}`);
+            navigate(`${routePrefix}/exceptions/${record.id}`);
           }}
         >
           View Details

@@ -5,15 +5,17 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { useNavigate } from 'react-router-dom';
+import { useRoutePrefix } from '../context/RoutePrefixContext';
 
 SyntaxHighlighter.registerLanguage('json', json);
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const QueryList: React.FC<{ queries: any[] }> = ({ queries }) => {
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const navigate = useNavigate();
+  const routePrefix = useRoutePrefix();
 
   const columns = [
     {
@@ -46,7 +48,7 @@ const QueryList: React.FC<{ queries: any[] }> = ({ queries }) => {
         <Button
           icon={<EyeOutlined />}
           onClick={() => {
-            navigate(`/queries/${record.id}`);
+            navigate(`${routePrefix}/queries/${record.id}`);
           }}
         >
           View Details

@@ -11,11 +11,14 @@ import Exceptions from '../views/Exceptions';
 import ExceptionDetails from '../views/ExceptionDetails';
 import Queries from '../views/Queries';
 import QueryDetails from '../views/QueryDetails';
+import logo from '../logo.svg';
+import { useRoutePrefix } from '../context/RoutePrefixContext';
 
 const LayoutComponent = () => {
   const { Sider, Content } = Layout;
   const { isDarkMode } = useTheme();
   const { token } = theme.useToken();
+  const routePrefix = useRoutePrefix();
 
   const [selectedMenu, setSelectedMenu] = useState('/requests');
   const [socket, setSocket] = useState<any>(null);
@@ -57,7 +60,7 @@ const LayoutComponent = () => {
             }}
             className="logo font-bold"
           >
-            Telescope
+            <img src={logo} alt="" />
           </div>
           <Menu
             theme={isDarkMode ? 'dark' : 'light'}
@@ -69,7 +72,7 @@ const LayoutComponent = () => {
               icon={<DatabaseOutlined />}
               onClick={() => setSelectedMenu('requests')}
             >
-              <Link to="/requests">Requests</Link>
+              <Link to={`${routePrefix}/requests`}>Requests</Link>
             </Menu.Item>
 
             <Menu.Item
@@ -77,14 +80,14 @@ const LayoutComponent = () => {
               icon={<CodeOutlined />}
               onClick={() => setSelectedMenu('exceptions')}
             >
-              <Link to="/exceptions">Exceptions</Link>
+              <Link to={`${routePrefix}/exceptions`}>Exceptions</Link>
             </Menu.Item>
             <Menu.Item
               key="/queries"
               icon={<ClockCircleOutlined />}
               onClick={() => setSelectedMenu('schedule')}
             >
-              <Link to="/queries">Queries</Link>
+              <Link to={`${routePrefix}/queries`}>Queries</Link>
             </Menu.Item>
           </Menu>
         </Sider>
@@ -114,13 +117,28 @@ const LayoutComponent = () => {
           <Layout>
             <Content style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
               <Routes>
-                <Route path="/" element={<Navigate to="/requests" replace />} />
-                <Route path="/requests" element={<Requests socket={socket} />} />
-                <Route path="/requests/:id" element={<RequestDetails socket={socket} />} />
-                <Route path="/exceptions" element={<Exceptions socket={socket} />} />
-                <Route path="/exceptions/:id" element={<ExceptionDetails socket={socket} />} />
-                <Route path="/queries" element={<Queries socket={socket} />} />
-                <Route path="/queries/:id" element={<QueryDetails socket={socket} />} />
+                <Route
+                  path={`${routePrefix}`}
+                  element={<Navigate to={`${routePrefix}/requests`} replace />}
+                />
+                <Route path={`${routePrefix}/requests`} element={<Requests socket={socket} />} />
+                <Route
+                  path={`${routePrefix}/requests/:id`}
+                  element={<RequestDetails socket={socket} />}
+                />
+                <Route
+                  path={`${routePrefix}/exceptions`}
+                  element={<Exceptions socket={socket} />}
+                />
+                <Route
+                  path={`${routePrefix}/exceptions/:id`}
+                  element={<ExceptionDetails socket={socket} />}
+                />
+                <Route path={`${routePrefix}/queries`} element={<Queries socket={socket} />} />
+                <Route
+                  path={`${routePrefix}/queries/:id`}
+                  element={<QueryDetails socket={socket} />}
+                />
               </Routes>
             </Content>
           </Layout>

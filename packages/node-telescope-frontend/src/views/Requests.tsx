@@ -8,12 +8,14 @@ import { getStatusColor } from '../utility/color';
 import { useNavigate } from 'react-router-dom';
 import useTelescopeEntries from '../hooks/useTelescopeEntries';
 import { EyeOutlined } from '@ant-design/icons';
+import { useRoutePrefix } from '../context/RoutePrefixContext';
 
 const { Text } = Typography;
 
 const Requests: React.FC<RequestsProps> = ({ socket }) => {
   const { entries } = useTelescopeEntries(socket, EntryType.REQUESTS);
   const navigate = useNavigate();
+  const routePrefix = useRoutePrefix();
 
   useEffect(() => {
     console.log('Entries updated:', entries);
@@ -69,7 +71,7 @@ const Requests: React.FC<RequestsProps> = ({ socket }) => {
         <Button
           icon={<EyeOutlined />}
           onClick={() => {
-            navigate(`/requests/${record.id}`);
+            navigate(`${routePrefix}/requests/${record.id}`);
           }}
         >
           View Details
