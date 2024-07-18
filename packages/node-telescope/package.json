@@ -1,6 +1,6 @@
 {
   "name": "node-telescope",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "A logging and monitoring library for node.js",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

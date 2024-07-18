@@ -34,10 +34,7 @@ async function createTestServer() {
 	});
 
 	app.use(telescope.middleware());
-	app.use('*', (req, res) => {
-		console.log(`Caught unhandled request: ${req.method} ${req.originalUrl}`);
-		res.status(404).send('Not Found');
-	});
+
 	// Routes
 	app.get('/', (req, res) => {
 		res.send('Hello World! This is the Production Test Server.');
@@ -48,12 +45,6 @@ async function createTestServer() {
 
 	app.get('/error', (_req, _res) => {
 		throw new Error('This is a test error');
-	});
-
-	// Error handling
-	app.use((err: Error, req: express.Request, res: express.Response) => {
-		console.error(err.stack);
-		res.status(500).send('Something broke!');
 	});
 
 	return server;
