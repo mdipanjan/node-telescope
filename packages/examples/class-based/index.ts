@@ -76,7 +76,6 @@ class TestServer {
 			storage: this.storage,
 			watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
 			enableQueryLogging: true,
-			routePrefix: '/telescope',
 			corsOptions: {
 				origin: 'http://localhost:3000', // React local url
 				methods: ['GET', 'POST'],

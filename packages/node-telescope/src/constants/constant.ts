@@ -24,3 +24,5 @@ export const MongoQueries: MongoQueryMethods[] = [
   'countDocuments',
   'estimatedDocumentCount',
 ];
+
+export const telescopeRoutePrefix = '/telescope';

@@ -8,7 +8,7 @@ import { generateCurlCommand } from '../utils/utility';
 export function telescopeMiddleware(telescope: Telescope) {
   return (req: Request, res: Response, next: NextFunction) => {
     console.log(`Telescope middleware called for ${req.method} ${req.url}`);
-    if (req.url.startsWith(telescope.options.routePrefix)) {
+    if (req.url.startsWith(telescope.getRoutePrefix())) {
       return next();
     }
     const requestId = uuidv4();

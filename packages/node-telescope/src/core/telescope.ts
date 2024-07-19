@@ -11,11 +11,13 @@ import { logException, setupExceptionLogging } from './entry-handlers/telescope-
 import express from 'express';
 import { setupQueryLogging } from './entry-handlers/telescope-query-logging';
 import { serveFrontend } from './serve-frontend';
+import { telescopeRoutePrefix } from '../constants/constant';
 
 export class Telescope {
   public options: TelescopeOptions;
   public storage: StorageInterface;
   private io: SocketServer | null = null;
+  private readonly routePrefix: string = telescopeRoutePrefix;
 
   constructor(options: TelescopeOptions) {
     this.options = this.initializeOptions(options);
@@ -34,7 +36,6 @@ export class Telescope {
         EntryType.QUERIES,
       ],
       enableQueryLogging: options.enableQueryLogging ?? false,
-      routePrefix: options.routePrefix || '/telescope',
       corsOptions: options.corsOptions || {},
       enableFileReading: options.enableFileReading ?? false,
       fileReadingEnvironments: options.fileReadingEnvironments ?? ['development'],
@@ -43,6 +44,10 @@ export class Telescope {
       responseBodySizeLimit: options.responseBodySizeLimit || 2000,
       queryResultSizeLimit: options.queryResultSizeLimit || 2000,
     };
+  }
+
+  public getRoutePrefix(): string {
+    return this.routePrefix;
   }
 
   private validateOptions(): void {
@@ -57,17 +62,17 @@ export class Telescope {
   public setupWithExpress(): void {
     const { app, server } = this.options;
     if (app && server) {
-      setupExpressMiddleware(app, this.options);
+      setupExpressMiddleware(app, this.options, this.getRoutePrefix());
       setupRoutes(app, this);
       this.setupSocketServer(server);
-      serveFrontend(app, this.options.routePrefix);
+      serveFrontend(app, this.routePrefix);
     }
   }
 
   private setupSocketServer(server: HttpServer): void {
     if (!this.io) {
       this.io = new SocketServer(server, {
-        path: `${this.options.routePrefix}/socket.io`,
+        path: `${this.routePrefix}/socket.io`,
         cors: this.options.corsOptions,
       });
       setupSocketIO(this.io, this.storage);

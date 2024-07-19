@@ -4,20 +4,24 @@ import { Telescope } from '../telescope';
 import { TelescopeOptions } from '../telescope-options';
 import { logger } from '../../utils/logger';
 
-export function setupExpressMiddleware(app: Express, options: TelescopeOptions): void {
+export function setupExpressMiddleware(
+  app: Express,
+  options: TelescopeOptions,
+  routePrefix: string,
+): void {
   app.use(cors(options.corsOptions));
-  app.use(options.routePrefix, express.static('public'));
+  app.use(routePrefix, express.static('public'));
 }
 
 export function setupRoutes(app: Express, telescope: Telescope): void {
   app.get(`/telescope-config`, getRouteConfig(telescope));
-  app.get(`${telescope.options.routePrefix}/api/entries`, getEntries(telescope));
-  app.get(`${telescope.options.routePrefix}/api/entries/:id`, getEntry(telescope));
+  app.get(`${telescope.getRoutePrefix()}/api/entries`, getEntries(telescope));
+  app.get(`${telescope.getRoutePrefix()}/api/entries/:id`, getEntry(telescope));
 }
 
 function getRouteConfig(telescope: Telescope) {
   return (_req: Request, res: Response): void => {
-    res.json({ routePrefix: telescope.options.routePrefix });
+    res.json({ routePrefix: telescope.getRoutePrefix() });
   };
 }
 

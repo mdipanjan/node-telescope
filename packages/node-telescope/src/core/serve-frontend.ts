@@ -14,6 +14,9 @@ export function serveFrontend(app: express.Application, routePrefix: string) {
     // Serve static files
     app.use(`${routePrefix}`, express.static(frontendPath));
 
+    app.get('/site.webmanifest', (_req, res) => {
+      res.sendFile(path.join(frontendPath, 'site.webmanifest'));
+    });
     // Serve index.html for all routes under the routePrefix
     app.get(`${routePrefix}/*`, (_req, res) => {
       res.sendFile(path.join(frontendPath, 'index.html'));

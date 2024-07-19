@@ -6,8 +6,6 @@ import { createServer } from 'http';
 
 dotenv.config();
 
-const route = '/telescope-test';
-
 async function createTestServer() {
 	const app = express();
 	const server = createServer(app);
@@ -26,7 +24,6 @@ async function createTestServer() {
 		storage: storage,
 		watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
 		enableQueryLogging: true,
-		routePrefix: route,
 		app: app,
 		server: server,
 		databaseType: TelescopeDatabaseType.MONGO,
@@ -56,7 +53,7 @@ createTestServer()
 		const PORT = process.env.PORT || 4000;
 		server.listen(PORT, () => {
 			console.log(`Server is running on http://localhost:${PORT}`);
-			console.log(`Telescope is available at http://localhost:${PORT}${route}`);
+			console.log(`Telescope is available at http://localhost:${PORT}/telescope`);
 		});
 	})
 	.catch(error => {

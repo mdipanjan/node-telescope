@@ -6,7 +6,7 @@ import { TelescopeDatabaseType } from '../types';
 export interface TelescopeOptions {
   storage: StorageInterface;
   watchedEntries: string[];
-  routePrefix: string;
+  // routePrefix?: string; // default: '/telescope' will make it dynamic later
   corsOptions?: Record<string, unknown>;
   app?: Express;
   server?: HttpServer;
