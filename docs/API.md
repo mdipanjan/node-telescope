@@ -15,7 +15,6 @@ constructor(options: TelescopeOptions)
 - `storage: StorageInterface` - The storage implementation to use (e.g., MongoStorage)
 - `watchedEntries: EntryType[]` - Array of entry types to watch (default: [REQUESTS, EXCEPTIONS, QUERIES])
 - `enableQueryLogging: boolean` - Whether to enable query logging (default: false)
-- `routePrefix: string` - Prefix for Telescope routes (default: '/telescope')
 - `corsOptions: object` - CORS options for Telescope routes
 - `app: Express` - Express application instance
 - `server: HttpServer` - HTTP server instance

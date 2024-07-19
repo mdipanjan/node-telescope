@@ -75,7 +75,6 @@ async function createServer() {
 		storage: storage,
 		watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
 		enableQueryLogging: true,
-		routePrefix: '/telescope',
 		app: app,
 		server: server,
 		databaseType: TelescopeDatabaseType.MONGO,
