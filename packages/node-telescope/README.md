@@ -42,6 +42,10 @@ app.use(telescope.middleware());
 server.listen(3000);
 ```
 
+## Testing
+
+For information on how to test the node-telescope package in a production-like environment, please see our [Production Test Guide](../../docs/PROD_TEST_GUIDE.md). Make sure to set up the required environment variables as described in the guide before running the prod-test.
+
 ## API Documentation
 
 For detailed API documentation, please refer to the [API Reference](../../docs/API.md).

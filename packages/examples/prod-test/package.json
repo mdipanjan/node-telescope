@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "tsc",
 		"test-server": "nodemon --watch '*.ts' --exec 'ts-node' index.ts",
-		"dev": "ts-node src/index.ts"
+		"start": "ts-node src/index.ts"
 	},
 	"dependencies": {
 		"body-parser": "^1.20.2",
