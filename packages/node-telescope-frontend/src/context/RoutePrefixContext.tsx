@@ -1,12 +1,16 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
-const RoutePrefixContext = createContext('');
+const RoutePrefixContext = createContext('/telescope');
 
 export const RoutePrefixProvider = ({ children }: { children: React.ReactNode }) => {
   const [routePrefix, setRoutePrefix] = useState('');
 
   useEffect(() => {
-    fetch('/telescope-config')
+    fetch(
+      process.env.NODE_ENV === 'development'
+        ? `http://localhost:4000/telescope-config`
+        : `/telescope-config`,
+    )
       .then(response => response.json())
       .then(data => setRoutePrefix(data.routePrefix))
       .catch(error => console.error('Error fetching route prefix:', error));

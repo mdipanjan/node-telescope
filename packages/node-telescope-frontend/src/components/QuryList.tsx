@@ -11,7 +11,11 @@ SyntaxHighlighter.registerLanguage('json', json);
 
 const { Title } = Typography;
 
-const QueryList: React.FC<{ queries: any[] }> = ({ queries }) => {
+const QueryList: React.FC<{
+  queries: any[];
+  pagination: { current: number; pageSize: number; total: number };
+  handlePageChange: (page: number, pageSize: number) => void;
+}> = ({ queries, pagination, handlePageChange }) => {
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const navigate = useNavigate();
@@ -66,7 +70,20 @@ const QueryList: React.FC<{ queries: any[] }> = ({ queries }) => {
   return (
     <div>
       <Title level={2}>Query List</Title>
-      <Table columns={columns} dataSource={queries} rowKey="id" />
+      <Table
+        columns={columns}
+        dataSource={queries}
+        rowKey="id"
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: handlePageChange,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+        }}
+      />
 
       <Drawer
         title="Query Details"

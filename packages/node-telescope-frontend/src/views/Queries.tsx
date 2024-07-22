@@ -6,7 +6,10 @@ import useTelescopeEntries from '../hooks/useTelescopeEntries';
 import QueryList from '../components/QuryList';
 
 const Queries: React.FC<RequestsProps> = ({ socket }) => {
-  const { entries, loading } = useTelescopeEntries(socket, EntryType.QUERIES);
+  const { entries, loading, pagination, handlePageChange } = useTelescopeEntries(
+    socket,
+    EntryType.QUERIES,
+  );
 
   useEffect(() => {
     console.log('Entries updated:', entries);
@@ -16,7 +19,9 @@ const Queries: React.FC<RequestsProps> = ({ socket }) => {
     return <div>Loading...</div>;
   }
 
-  return <QueryList queries={entries} />;
+  return (
+    <QueryList queries={entries} pagination={pagination} handlePageChange={handlePageChange} />
+  );
 };
 
 export default Queries;

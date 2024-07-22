@@ -12,7 +12,7 @@ import { useRoutePrefix } from '../context/RoutePrefixContext';
 const { Text } = Typography;
 
 const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
-  const { entries } = useTelescopeEntries(socket, EntryType.EXCEPTIONS);
+  const { entries, pagination, handlePageChange } = useTelescopeEntries(socket, EntryType.REQUESTS);
   const navigate = useNavigate();
   const routePrefix = useRoutePrefix();
 
@@ -67,7 +67,15 @@ const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
         dataSource={entries}
         columns={columns as any}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: handlePageChange,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+        }}
       />
     </div>
   );

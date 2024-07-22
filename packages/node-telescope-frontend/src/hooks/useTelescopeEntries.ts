@@ -11,6 +11,7 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
     (page: number = 1, pageSize: number = 20) => {
       if (socket && socket.connected) {
         console.log(`Requesting ${entryType} entries for page ${page}`);
+        setLoading(true);
         socket.emit(EventTypes.GET_INITIAL_ENTRIES, {
           type: entryType,
           page,
@@ -29,7 +30,7 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
       console.log('Setting up socket listeners');
 
       socket.on(EventTypes.INITIAL_ENTRIES, (data: any) => {
-        console.log('Received initial entries:', data);
+        console.log('Received entries:', data);
         setEntries(data.entries || []);
         setPagination({
           current: data.pagination.currentPage,
@@ -42,14 +43,19 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
       socket.on(EventTypes.NEW_ENTRY, (entry: Entry) => {
         console.log('Received new entry:', entry);
         if (entry.type === entryType) {
-          setEntries(prevEntries => [entry, ...prevEntries]);
+          setEntries(prevEntries => {
+            if (pagination.current === 1) {
+              return [entry, ...prevEntries.slice(0, -1)];
+            }
+            return prevEntries;
+          });
           setPagination(prev => ({ ...prev, total: prev.total + 1 }));
         }
       });
 
       socket.on('connect', () => {
         console.log('Socket connected');
-        fetchEntries();
+        fetchEntries(pagination.current, pagination.pageSize);
       });
 
       socket.on('disconnect', () => {
@@ -57,7 +63,7 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
         setLoading(true);
       });
 
-      fetchEntries();
+      fetchEntries(pagination.current, pagination.pageSize);
     }
 
     return () => {
@@ -69,10 +75,10 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
         socket.off('disconnect');
       }
     };
-  }, [socket, entryType, fetchEntries]);
+  }, [socket, entryType, fetchEntries, pagination.current, pagination.pageSize]);
 
   const handlePageChange = (page: number, pageSize?: number) => {
-    fetchEntries(page, pageSize);
+    fetchEntries(page, pageSize || pagination.pageSize);
   };
 
   return { entries, loading, pagination, handlePageChange };

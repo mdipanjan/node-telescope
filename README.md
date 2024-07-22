@@ -5,6 +5,10 @@
 
 Node Telescope is a comprehensive logging and monitoring solution for Node.js applications. It provides real-time insights into your application's performance, errors, and database queries, with support for both MongoDB and PostgreSQL.
 
+![Banner](docs/images/dash-light.png)
+
+![Banner](docs/images/dash-dark.png)
+
 ## 🚀 Features
 
 - Real-time request logging
