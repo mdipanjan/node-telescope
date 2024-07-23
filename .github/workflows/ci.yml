@@ -6,11 +6,13 @@ on:
     branches: [main]
     paths:
       - 'packages/node-telescope/**'
+      - 'packages/node-telescope-frontend/**'
       - '.github/workflows/**'
   pull_request:
     branches: [main]
     paths:
       - 'packages/node-telescope/**'
+      - 'packages/node-telescope-frontend/**'
       - '.github/workflows/**'
 
 jobs:
@@ -31,16 +33,28 @@ jobs:
         run: npm ci
       - name: Bootstrap packages
         run: npm run bootstrap
-      - name: Install package-specific dependencies
+      - name: Check crucial files
+        run: |
+          if [ ! -f packages/node-telescope-frontend/public/index.html ]; then
+            echo "index.html is missing in frontend public directory"
+            exit 1
+          fi
+          if [ ! -f packages/node-telescope-frontend/src/index.tsx ]; then
+            echo "index.tsx is missing in frontend src directory"
+            exit 1
+          fi
+      - name: Install and build node-telescope
         run: |
           cd packages/node-telescope
           npm install
+          npm run build
+      - name: Install and build node-telescope-frontend
+        run: |
+          cd packages/node-telescope-frontend
+          npm install
+          npm run build
       - name: Lint packages
         run: npm run lint
-      - name: Format packages
-        run: npm run format
-      - name: Build packages
-        run: npm run build
       - name: Run tests
         run: npm test
       - name: Run npm audit in root
