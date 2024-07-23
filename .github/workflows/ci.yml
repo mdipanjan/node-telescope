@@ -3,8 +3,14 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'packages/node-telescope/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'packages/node-telescope/**'
+      - '.github/workflows/**'
 
 jobs:
   build:
@@ -21,6 +27,28 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
-      - run: npm run build
-      - run: npm test
-      - run: npm run lint
+      - name: Bootstrap packages
+        run: npm run bootstrap
+      - name: Lint packages
+        run: npm run lint
+      - name: Format packages
+        run: npm run format
+      - name: Build packages
+        run: npm run build
+      - name: Run tests
+        run: npm test
+      - name: Run npm audit in root
+        run: npm audit
+      - name: Run npm audit in node-telescope package
+        run: |
+          cd packages/node-telescope
+          npm audit
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run npm audit in node-telescope package
+        run: |
+          cd packages/node-telescope
+          npm audit --production

@@ -1,37 +1,37 @@
 {
-  "name": "node-telescope-example-class-based",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Class-based example for node-telescope",
-  "main": "index.js",
-  "scripts": {
-    "start": "ts-node index.ts",
-    "test-server": "nodemon --watch '*.ts' --exec 'ts-node' index.ts",
-    "clean": "rimraf node_modules/node-telescope",
-    "rebuild-telescope": "cd ../../node-telescope && npm run build",
-    "relink-telescope": "npm run clean && npm link ../../node-telescope",
-    "update-telescope": "npm run rebuild-telescope && npm run relink-telescope",
-    "dev": "npm run update-telescope && ts-node-dev --respawn --transpile-only index.ts",
-    "type-check": "tsc --noEmit",
-    "clear-cache": "node -e \"Object.keys(require.cache).forEach(key => delete require.cache[key])\""
-  },
-  "dependencies": {
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mongoose": "^8.4.4",
-    "node-telescope": "file:../../node-telescope"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/dotenv": "^8.2.0",
-    "@types/express": "^4.17.11",
-    "@types/mongoose": "^5.10.5",
-    "@types/node": "^14.14.41",
-    "nodemon": "^3.1.4",
-    "rimraf": "^5.0.7",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0"
-  }
+	"name": "node-telescope-example-class-based",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Class-based example for node-telescope",
+	"main": "index.js",
+	"scripts": {
+		"start": "ts-node index.ts",
+		"test-server": "nodemon --watch '*.ts' --exec 'ts-node' index.ts",
+		"clean": "rimraf node_modules/node-telescope",
+		"rebuild-telescope": "cd ../../node-telescope && npm run build",
+		"relink-telescope": "npm run clean && npm link ../../node-telescope",
+		"update-telescope": "npm run rebuild-telescope && npm run relink-telescope",
+		"dev": "npm run update-telescope && ts-node-dev --respawn --transpile-only index.ts",
+		"type-check": "tsc --noEmit",
+		"clear-cache": "node -e \"Object.keys(require.cache).forEach(key => delete require.cache[key])\""
+	},
+	"dependencies": {
+		"body-parser": "^1.20.2",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2",
+		"mongoose": "^8.4.4",
+		"node-telescope": "file:../../node-telescope"
+	},
+	"devDependencies": {
+		"@types/cors": "^2.8.17",
+		"@types/dotenv": "^8.2.0",
+		"@types/express": "^4.17.11",
+		"@types/mongoose": "^5.10.5",
+		"@types/node": "^14.14.41",
+		"nodemon": "^3.1.4",
+		"rimraf": "^5.0.7",
+		"ts-node": "^10.9.2",
+		"ts-node-dev": "^2.0.0"
+	}
 }
