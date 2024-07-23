@@ -27,9 +27,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
+      - name: Install root dependencies
+        run: npm ci
       - name: Bootstrap packages
         run: npm run bootstrap
+      - name: Install package-specific dependencies
+        run: |
+          cd packages/node-telescope
+          npm install
       - name: Lint packages
         run: npm run lint
       - name: Format packages
@@ -56,4 +61,5 @@ jobs:
       - name: Run npm audit in node-telescope package
         run: |
           cd packages/node-telescope
+          npm install
           npm audit --production
