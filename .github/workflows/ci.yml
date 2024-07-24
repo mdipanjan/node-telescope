@@ -39,8 +39,8 @@ jobs:
             echo "index.html is missing in frontend public directory"
             exit 1
           fi
-          if [ ! -f packages/node-telescope-frontend/src/index.tsx ]; then
-            echo "index.tsx is missing in frontend src directory"
+          if [ ! -f packages/node-telescope-frontend/public/logo.svg ]; then
+            echo "logo.svg is missing in frontend public directory"
             exit 1
           fi
       - name: Install and build node-telescope

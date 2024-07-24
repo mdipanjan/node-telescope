@@ -11,7 +11,6 @@ import Exceptions from '../views/Exceptions';
 import ExceptionDetails from '../views/ExceptionDetails';
 import Queries from '../views/Queries';
 import QueryDetails from '../views/QueryDetails';
-import logo from '../logo.svg';
 import { useRoutePrefix } from '../context/RoutePrefixContext';
 import { useSocket } from '../hooks/useSocket';
 
@@ -40,7 +39,7 @@ const LayoutComponent = () => {
             }}
             className="logo font-bold"
           >
-            <img src={logo} alt="" />
+            <img src={`${process.env.PUBLIC_URL}/logo.svg`} alt="" />
           </div>
           <Menu
             theme={isDarkMode ? 'dark' : 'light'}
