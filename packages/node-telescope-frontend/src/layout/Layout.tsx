@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Flex, Layout, Menu, theme } from 'antd';
 import { DatabaseOutlined, CodeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import ThemeToggle from '../components/ThemeToggle';
 import Requests from '../views/Requests';
-import { io } from 'socket.io-client';
 import { useTheme } from '../context/ThemeContext';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import RequestDetails from '../views/RequestDetails';

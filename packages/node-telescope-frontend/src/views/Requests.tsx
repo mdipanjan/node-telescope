@@ -80,10 +80,6 @@ const Requests: React.FC<RequestsProps> = ({ socket }) => {
     },
   ];
 
-  const loadNewEntries = () => {
-    // socket.emit('getInitialEntries'); // have to decide on this
-  };
-
   return (
     <div>
       <Table

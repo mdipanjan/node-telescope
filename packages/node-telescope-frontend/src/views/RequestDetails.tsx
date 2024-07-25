@@ -35,7 +35,7 @@ import { RequestsProps } from '../types/GeneralTypes';
 import useEntryDetails from '../hooks/useEntryDetails';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 
@@ -55,7 +55,7 @@ const hasMemoryUsage = (
 
 const RequestDetails: React.FC<RequestsProps> = ({ socket }) => {
   const { id } = useParams<{ id: string }>();
-  const { entry, loading, error, refetch } = useEntryDetails(socket, id!);
+  const { entry, loading, error } = useEntryDetails(socket, id!);
   const [activeKeys, setActiveKeys] = useState<string[]>(['1', '2']);
 
   if (loading) {

@@ -6,6 +6,8 @@ node_modules/
 *.js
 *.d.ts
 build/
+# Don't ignore any files in the scripts directory
+!/scripts/**/*
 
 
 

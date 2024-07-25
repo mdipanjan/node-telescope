@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Descriptions, Typography, Collapse, Table, Tag } from 'antd';
+import { Card, Descriptions, Typography, Collapse, Tag } from 'antd';
 import { ClockCircleOutlined, BugOutlined, FileOutlined } from '@ant-design/icons';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
