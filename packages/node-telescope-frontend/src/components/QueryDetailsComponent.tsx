@@ -8,11 +8,9 @@ import { useNavigate } from 'react-router-dom';
 
 SyntaxHighlighter.registerLanguage('json', json);
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const QueryDetailsComponent: React.FC<{ query: any }> = ({ query }) => {
-  const navigate = useNavigate();
-
   const safeJsonParse = (jsonString: string) => {
     try {
       return JSON.parse(jsonString);

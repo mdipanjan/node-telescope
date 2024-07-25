@@ -75,7 +75,7 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
         socket.off('disconnect');
       }
     };
-  }, [socket, entryType, fetchEntries, pagination.current, pagination.pageSize]);
+  }, [socket, entryType, fetchEntries, pagination]);
 
   const handlePageChange = (page: number, pageSize?: number) => {
     fetchEntries(page, pageSize || pagination.pageSize);

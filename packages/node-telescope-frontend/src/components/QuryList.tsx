@@ -16,7 +16,7 @@ const QueryList: React.FC<{
   pagination: { current: number; pageSize: number; total: number };
   handlePageChange: (page: number, pageSize: number) => void;
 }> = ({ queries, pagination, handlePageChange }) => {
-  const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
+  const [selectedQuery] = useState<any | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const navigate = useNavigate();
   const routePrefix = useRoutePrefix();
