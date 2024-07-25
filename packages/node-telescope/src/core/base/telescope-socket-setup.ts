@@ -11,22 +11,23 @@ export function setupSocketIO(io: SocketServer, storage: StorageInterface): void
 }
 
 async function handleSocketConnection(socket: Socket, storage: StorageInterface): Promise<void> {
-  console.log('New socket connection established');
+  logger.info('New socket connection established');
+  socket.on(EventTypes.GET_INITIAL_ENTRIES, handleGetInitialEntries);
+  socket.on(EventTypes.GET_ENTRY_DETAILS, handleGetEntryDetails);
+  storage.on(EventTypes.NEW_ENTRY, handleNewEntry);
+  socket.on('disconnect', handleDisconnect);
 
-  socket.on(
-    EventTypes.GET_INITIAL_ENTRIES,
-    (params: { type: EntryType; page: number; perPage: number }) => {
-      console.log(`Received request for initial entries:`, params);
-      sendInitialEntries(socket, storage, params);
-    },
-  );
+  async function handleGetInitialEntries(params: {
+    type: EntryType;
+    page: number;
+    perPage: number;
+  }) {
+    logger.info(`Received request for initial entries:`, params);
+    await sendInitialEntries(socket, storage, params);
+  }
 
-  storage.on(EventTypes.NEW_ENTRY, (entry: unknown) => {
-    console.log('New entry detected, emitting to client');
-    socket.emit(EventTypes.NEW_ENTRY, entry);
-  });
-
-  socket.on(EventTypes.GET_ENTRY_DETAILS, async ({ id }: { id: string }) => {
+  async function handleGetEntryDetails({ id }: { id: string }) {
+    logger.info(`Received request for entry details:`, id);
     try {
       const entry = await storage.getEntry(id);
       if (entry) {
@@ -38,7 +39,17 @@ async function handleSocketConnection(socket: Socket, storage: StorageInterface)
       logger.error('Failed to fetch entry details:', error);
       socket.emit('error', { message: 'Failed to fetch entry details' });
     }
-  });
+  }
+
+  function handleNewEntry(entry: unknown) {
+    logger.info('New entry detected, emitting to client');
+    socket.emit(EventTypes.NEW_ENTRY, entry);
+  }
+
+  function handleDisconnect() {
+    logger.info('Client disconnected from Telescope');
+    socket.removeAllListeners();
+  }
 }
 
 async function sendInitialEntries(
@@ -46,7 +57,7 @@ async function sendInitialEntries(
   storage: StorageInterface,
   params: { type: EntryType; page: number; perPage: number },
 ): Promise<void> {
-  console.log(`Fetching initial entries with params:`, params);
+  logger.info(`Fetching initial entries with params:`, params);
   try {
     const recentEntries = await storage.getEntries({
       page: params.page,
@@ -54,10 +65,10 @@ async function sendInitialEntries(
       sort: { timestamp: -1 },
       type: params.type,
     });
-    console.log(`Sending ${recentEntries.entries.length} initial entries`);
+    logger.info(`Sending ${recentEntries.entries.length} initial entries`);
     socket.emit(EventTypes.INITIAL_ENTRIES, recentEntries);
   } catch (error) {
-    console.error('Failed to send initial entries:', error);
+    logger.error('Failed to send initial entries:', error);
     socket.emit('error', { message: 'Failed to fetch initial entries' });
   }
 }

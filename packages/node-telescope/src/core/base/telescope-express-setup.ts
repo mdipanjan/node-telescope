@@ -10,7 +10,16 @@ export function setupExpressMiddleware(
   routePrefix: string,
 ): void {
   app.use(cors(options.corsOptions));
-  app.use(routePrefix, express.static('public'));
+  app.use(
+    routePrefix,
+    express.static('public', {
+      maxAge: '1d',
+      etag: false,
+      setHeaders: res => {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+      },
+    }),
+  );
 }
 
 export function setupRoutes(app: Express, telescope: Telescope): void {

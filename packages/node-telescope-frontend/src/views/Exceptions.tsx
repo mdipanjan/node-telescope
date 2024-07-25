@@ -12,7 +12,10 @@ import { useRoutePrefix } from '../context/RoutePrefixContext';
 const { Text } = Typography;
 
 const Exceptions: React.FC<RequestsProps> = ({ socket }) => {
-  const { entries, pagination, handlePageChange } = useTelescopeEntries(socket, EntryType.REQUESTS);
+  const { entries, pagination, handlePageChange } = useTelescopeEntries(
+    socket,
+    EntryType.EXCEPTIONS,
+  );
   const navigate = useNavigate();
   const routePrefix = useRoutePrefix();
 

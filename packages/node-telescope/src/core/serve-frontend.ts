@@ -1,12 +1,13 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { logger } from '../utils/logger';
 
 export function serveFrontend(app: express.Application, routePrefix: string) {
   const frontendPath = path.resolve(__dirname, '../../frontend');
 
-  console.log(`[serveFrontend] Attempting to serve frontend from: ${frontendPath}`);
-  console.log(`[serveFrontend] Route prefix: ${routePrefix}`);
+  logger.info(`[serveFrontend] Attempting to serve frontend from: ${frontendPath}`);
+  logger.info(`[serveFrontend] Route prefix: ${routePrefix}`);
 
   if (fs.existsSync(frontendPath)) {
     console.log(`[serveFrontend] Frontend directory exists. Setting up routes.`);

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { TelescopeOptions } from '../telescope-options';
 import { sanitizeCodeSnippet } from '../../utils/utility';
+import { logger } from '../../utils/logger';
 
 export function shouldReadFile(options: TelescopeOptions): boolean | undefined {
   return (
@@ -12,7 +13,9 @@ export function shouldReadFile(options: TelescopeOptions): boolean | undefined {
 
 export function sanitizeFilePath(filePath: string): string {
   const projectRoot = process.cwd();
-  return filePath.replace(projectRoot, '[PROJECT_ROOT]');
+  return filePath.includes(projectRoot)
+    ? filePath.replace(projectRoot, '[PROJECT_ROOT]')
+    : filePath;
 }
 
 export function getFileContext(
@@ -20,22 +23,22 @@ export function getFileContext(
   filePath?: string,
   lineNumber?: number,
 ): { [key: string]: string } | undefined {
-  if (!shouldReadFile(options) || !filePath || !lineNumber) return undefined;
+  if (!shouldReadFile(options) || !filePath || typeof lineNumber !== 'number') return undefined;
 
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
-    const lines = fileContent.split('\n');
-    const start = Math.max(0, lineNumber - 3);
-    const end = Math.min(lines.length, lineNumber + 2);
-    const context: { [key: string]: string } = {};
+    const fileLines = fileContent.split('\n');
+    const startLine = Math.max(0, lineNumber - 3);
+    const endLine = Math.min(fileLines.length, lineNumber + 2);
+    const contextLines: { [key: string]: string } = {};
 
-    for (let i = start; i < end; i++) {
-      context[`${i + 1}`] = sanitizeCodeSnippet(lines[i]);
+    for (let i = startLine; i < endLine; i++) {
+      contextLines[`${i + 1}`] = sanitizeCodeSnippet(fileLines[i]);
     }
 
-    return context;
+    return contextLines;
   } catch (error) {
-    console.error('Failed to read file for context:', error);
+    logger.error('Failed to read file for context:', { error, filePath, lineNumber });
     return undefined;
   }
 }

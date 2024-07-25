@@ -150,8 +150,8 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
         if (endDate) findQuery.timestamp.$lte = new Date(endDate);
       }
 
-      console.log('Constructed findQuery:', JSON.stringify(findQuery, null, 2));
-      console.log('Sort order:', sort);
+      logger.info('Constructed findQuery:', JSON.stringify(findQuery, null, 2));
+      logger.info('Sort order:', sort);
 
       const entries = await this.EntryModel.find(findQuery)
         .sort(sort)
@@ -159,7 +159,7 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
         .limit(perPage)
         .lean();
 
-      console.log(`Found ${entries.length} entries`);
+      logger.info(`Found ${entries.length} entries`);
 
       const total = await this.EntryModel.countDocuments(findQuery);
 

@@ -91,3 +91,9 @@ export enum TelescopeDatabaseType {
   MYSQL = 'mysql',
   DYNAMODB = 'dynamodb',
 }
+
+export enum ExceptionTypes {
+  UNHANDLED_REJECTION = 'unhandledRejection',
+  UNCAUGHT_EXCEPTION = 'uncaughtException',
+  CUSTOM = 'custom',
+}
