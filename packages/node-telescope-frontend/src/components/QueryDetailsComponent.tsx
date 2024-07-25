@@ -4,7 +4,6 @@ import { ClockCircleOutlined, DatabaseOutlined, EyeOutlined } from '@ant-design/
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import { useNavigate } from 'react-router-dom';
 
 SyntaxHighlighter.registerLanguage('json', json);
 

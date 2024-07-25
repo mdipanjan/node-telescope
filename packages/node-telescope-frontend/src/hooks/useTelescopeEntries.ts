@@ -75,6 +75,7 @@ const useTelescopeEntries = (socket: any, entryType: EntryType) => {
         socket.off('disconnect');
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, entryType, fetchEntries, pagination.current, pagination.pageSize]);
 
   const handlePageChange = (page: number, pageSize?: number) => {
