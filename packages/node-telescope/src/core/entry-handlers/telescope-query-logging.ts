@@ -21,7 +21,12 @@ export function setupQueryLogging(telescope: Telescope): void {
   }
 }
 
-export function logQuery(telescope: Telescope, startTime: number, args: any[], result: any): void {
+export function logQuery(
+  telescope: Telescope,
+  startTime: number,
+  args: any[],
+  result: unknown,
+): void {
   const duration = Date.now() - startTime;
   const queryText = typeof args[0] === 'string' ? args[0] : args[0].text;
   const queryValues = args[1] || [];

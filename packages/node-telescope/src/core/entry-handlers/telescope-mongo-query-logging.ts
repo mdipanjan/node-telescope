@@ -4,6 +4,7 @@ import { EntryType, QueryEntry } from '../../types';
 import { getRequestId } from '../../utils/async-context';
 import { MongoQueries } from '../../constants/constant';
 import mongoose from 'mongoose';
+import { logger } from '../../utils/logger';
 
 export function setupMongoQueryLogging(telescope: Telescope): void {
   const storage = telescope.storage as MongoStorage;
@@ -37,11 +38,11 @@ export function setupMongoQueryLogging(telescope: Telescope): void {
             },
           };
 
-          console.log('Query Logging:', entry);
+          logger.info('Query Logging:', entry);
           storage
             .storeEntry(entry)
-            .then(() => console.log('Query entry stored successfully'))
-            .catch(error => console.error('Failed to store query entry:', error));
+            .then(() => logger.info('Query entry stored successfully'))
+            .catch(error => logger.error('Failed to store query entry:', error));
         });
       });
 
@@ -49,9 +50,9 @@ export function setupMongoQueryLogging(telescope: Telescope): void {
     };
 
     connection.plugin(queryPlugin);
-    console.log('MongoDB query logging set up successfully');
+    logger.info('MongoDB query logging set up successfully');
   } else {
-    console.warn('MongoDB connection not available for query logging');
+    logger.warn('MongoDB connection not available for query logging');
   }
 }
 
@@ -80,7 +81,7 @@ function setupSaveLogging(
       },
     };
 
-    console.log('Query Logging (Save):', entry);
+    logger.info('Query Logging (Save):', entry);
     storage
       .storeEntry(entry)
       .then(() => console.log('Save query entry stored successfully'))

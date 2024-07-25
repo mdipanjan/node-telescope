@@ -26,7 +26,7 @@ export function setupPostgresQueryLogging(telescope: Telescope): void {
 
   const interceptedQuery = function (
     this: Pool,
-    queryTextOrConfig: string | QueryConfig<any[]>,
+    queryTextOrConfig: string | QueryConfig<unknown[]>,
     values?: any[] | ((err: Error, result: QueryResult<QueryResultRow>) => void),
     callback?: (err: Error, result: QueryResult<QueryResultRow>) => void,
   ): Promise<QueryResult> | void {
@@ -47,7 +47,7 @@ export function setupPostgresQueryLogging(telescope: Telescope): void {
           logQuery(telescope, startTime, [queryTextOrConfig, values], result);
           return result;
         })
-        .catch((error: any) => {
+        .catch((error: Error) => {
           console.error('Error in query:', error);
           throw error;
         });
@@ -61,7 +61,7 @@ export function setupPostgresQueryLogging(telescope: Telescope): void {
   Object.assign(interceptedQuery, originalQuery);
 
   // Type assertion to match the complex overloaded signature
-  (pool as any).query = interceptedQuery as typeof pool.query;
+  (pool as Pool).query = interceptedQuery as typeof pool.query;
 
   telescope.storage.setPool(pool);
 

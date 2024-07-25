@@ -17,7 +17,7 @@ export interface AdvancedQueryOptions {
   startDate?: string | Date;
   endDate?: string | Date;
   sort?: { [key: string]: 1 | -1 };
-  [key: string]: any; // for additional filters
+  [key: string]: unknown; // for additional filters
 }
 
 export interface StorageInterface extends EventEmitter {

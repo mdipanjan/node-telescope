@@ -1,4 +1,4 @@
-import { Pool, PoolConfig } from 'pg';
+import { Pool, PoolClient, PoolConfig } from 'pg';
 import { AdvancedQueryOptions, StorageInterface } from '../storage-interface';
 import { logger } from '../../utils/logger';
 import {
@@ -57,7 +57,7 @@ export class PostgreSQLStorage extends EventEmitter implements StorageInterface 
   }
 
   async storeEntry(entry: Omit<Entry, 'id'>): Promise<string> {
-    const client = await this.pool.connect();
+    const client: PoolClient = await this.pool.connect();
     try {
       const id = crypto.randomUUID();
       await executeTransaction(client, async c => {
@@ -130,7 +130,7 @@ export class PostgreSQLStorage extends EventEmitter implements StorageInterface 
       const { page = 1, perPage = 20, type, requestId } = queryOptions;
       const offset = (page - 1) * perPage;
 
-      const queryParams: any[] = [];
+      const queryParams: unknown[] = [];
       const whereConditions: string[] = [];
 
       if (type) {
@@ -178,7 +178,7 @@ export class PostgreSQLStorage extends EventEmitter implements StorageInterface 
 
   async getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]> {
     try {
-      const queryParams: any[] = [];
+      const queryParams: unknown[] = [];
       let query = 'SELECT * FROM entries';
 
       if (type) {

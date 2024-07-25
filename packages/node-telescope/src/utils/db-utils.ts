@@ -1,6 +1,8 @@
+import { PoolClient } from 'pg';
+
 export async function executeTransaction(
-  client: any,
-  callback: (client: any) => Promise<void>,
+  client: PoolClient,
+  callback: (client: PoolClient) => Promise<void>,
 ): Promise<void> {
   try {
     await client.query('BEGIN');
@@ -12,6 +14,6 @@ export async function executeTransaction(
   }
 }
 
-export function buildWhereClause(conditions: string[], _params: any[]): string {
+export function buildWhereClause(conditions: string[], _params: unknown[]): string {
   return conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
 }

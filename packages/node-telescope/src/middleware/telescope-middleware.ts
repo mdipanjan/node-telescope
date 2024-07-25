@@ -21,12 +21,12 @@ export function telescopeMiddleware(telescope: Telescope) {
 
       res.write = function (
         this: Response,
-        chunk: any,
+        chunk: Buffer,
         encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
         cb?: (error: Error | null) => void,
       ): boolean {
         chunks.push(Buffer.from(chunk));
-        return originalWrite.call(this, chunk, encodingOrCallback as any, cb as any);
+        return originalWrite.call(this, chunk, encodingOrCallback as BufferEncoding, cb as any);
       };
 
       res.end = function (
