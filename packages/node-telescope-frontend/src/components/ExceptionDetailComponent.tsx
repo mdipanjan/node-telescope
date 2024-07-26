@@ -73,19 +73,17 @@ const CodeEditorStyle: React.FC<{
 };
 
 const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) => {
-  const { exception: exceptionData } = exception;
-
   const renderCodeContext = () => {
-    if (!exceptionData.context) return null;
+    if (!exception.context) return null;
 
-    const lineNumbers = Object.keys(exceptionData.context).map(Number);
+    const lineNumbers = Object.keys(exception.context).map(Number);
     const startLine = Math.min(...lineNumbers);
-    const code = Object.entries(exceptionData.context)
+    const code = Object.entries(exception.context)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
       .map(([_, line]) => line)
       .join('\n');
 
-    return <CodeEditorStyle code={code} errorLine={exceptionData.line} startLine={startLine} />;
+    return <CodeEditorStyle code={code} errorLine={exception.line} startLine={startLine} />;
   };
 
   return (
@@ -101,28 +99,28 @@ const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) 
           <Descriptions.Item label="Type">
             <BugOutlined /> {exception.type}
           </Descriptions.Item>
-          <Descriptions.Item label="Class">{exceptionData.class}</Descriptions.Item>
+          <Descriptions.Item label="Class">{exception.class}</Descriptions.Item>
         </Descriptions>
       </Card>
 
       <Card style={{ marginTop: 16 }}>
         <Title level={4}>Exception Message</Title>
         <Paragraph>
-          <Text strong>{exceptionData.message}</Text>
+          <Text strong>{exception.message}</Text>
         </Paragraph>
-        {exceptionData.file && (
+        {exception.file && (
           <Paragraph>
-            <FileOutlined /> {exceptionData.file}
-            {exceptionData.line && (
+            <FileOutlined /> {exception.file}
+            {exception.line && (
               <Tag color="red" style={{ marginLeft: 8 }}>
-                Line {exceptionData.line}
+                Line {exception.line}
               </Tag>
             )}
           </Paragraph>
         )}
       </Card>
 
-      {exceptionData.context && (
+      {exception.context && (
         <Card style={{ marginTop: 16 }}>
           <Title level={4}>Code Context</Title>
           {renderCodeContext()}
@@ -132,7 +130,7 @@ const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) 
       <Collapse style={{ marginTop: 16 }}>
         <Panel header="Stack Trace" key="1">
           <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-            {exceptionData.stack}
+            {exception.stack}
           </pre>
         </Panel>
       </Collapse>
