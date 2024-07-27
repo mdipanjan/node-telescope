@@ -1,7 +1,8 @@
+import { PoolClient } from 'pg';
 import { RequestEntry } from '../../types';
 
 export class RequestStorage {
-  static async storeEntry(client: any, id: string, entry: RequestEntry): Promise<void> {
+  static async storeEntry(client: PoolClient, id: string, entry: RequestEntry): Promise<void> {
     await client.query(
       `INSERT INTO requests (
         id, method, url, headers, body, ip, request_id, 
@@ -30,7 +31,11 @@ export class RequestStorage {
     );
   }
 
-  static async getEntry(client: any, id: string, baseEntry: any): Promise<RequestEntry> {
+  static async getEntry(
+    client: PoolClient,
+    id: string,
+    baseEntry: RequestEntry,
+  ): Promise<RequestEntry> {
     const requestResult = await client.query('SELECT * FROM requests WHERE id = $1', [id]);
     const request = requestResult.rows[0];
     return {
