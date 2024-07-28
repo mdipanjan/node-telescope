@@ -27,5 +27,5 @@ export interface StorageInterface extends EventEmitter {
   getEntries(query: QueryOptions): Promise<{ entries: Entry[]; pagination: unknown }>;
   getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]>;
   prune(maxAge: number): Promise<void>;
-  getPool?(): Pool | null; // New method
+  getPool?(): Pool | null;
 }

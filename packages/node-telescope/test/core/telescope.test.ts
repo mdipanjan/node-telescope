@@ -4,7 +4,7 @@ import { TelescopeDatabaseType, EntryType } from '../../src/types';
 import { MockStorage } from '../mocks/mock-storage';
 import { Express } from 'express';
 import { setupSocketIO } from '../../src/core/base/telescope-socket-setup';
-import { setupExpressMiddleware, setupRoutes } from '../../src/core/base/telescope-express-setup';
+import { setupExpressMiddleware } from '../../src/core/base/telescope-express-setup';
 import { logger } from '../../src/utils/logger';
 import { setupExceptionLogging } from '../../src/core/entry-handlers/telescope-exception-handling';
 import { setupQueryLogging } from '../../src/core/entry-handlers/telescope-query-logging';
@@ -53,7 +53,6 @@ describe('Telescope', () => {
     const options: TelescopeOptions = {
       storage: mockStorage,
       watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS],
-      routePrefix: '/telescope',
       databaseType: TelescopeDatabaseType.MONGO,
       app: mockApp as Express,
       server: {} as any,
@@ -65,7 +64,6 @@ describe('Telescope', () => {
   test('initializes with correct options', () => {
     expect(telescope.options.watchedEntries).toContain(EntryType.REQUESTS);
     expect(telescope.options.watchedEntries).toContain(EntryType.EXCEPTIONS);
-    expect(telescope.options.routePrefix).toBe('/telescope');
     expect(telescope.options.enableFileReading).toBe(false);
     expect(telescope.options.fileReadingEnvironments).toEqual(['development']);
     expect(telescope.options.includeCurlCommand).toBe(false);
@@ -75,8 +73,7 @@ describe('Telescope', () => {
   });
 
   test('setupExpressMiddleware and setupRoutes are called with correct parameters', () => {
-    expect(setupExpressMiddleware).toHaveBeenCalledWith(mockApp, telescope.options);
-    expect(setupRoutes).toHaveBeenCalledWith(mockApp, telescope);
+    expect(setupExpressMiddleware).toHaveBeenCalledWith(mockApp, telescope.options, '/telescope');
   });
 
   test('initialize correctly sets up exception logging', () => {
@@ -84,7 +81,6 @@ describe('Telescope', () => {
     telescope = new Telescope({
       storage: mockStorage,
       watchedEntries: [],
-      routePrefix: '/telescope',
       databaseType: TelescopeDatabaseType.MONGO,
       app: mockApp as Express,
       server: {} as any,
