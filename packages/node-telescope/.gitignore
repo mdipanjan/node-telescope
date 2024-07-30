@@ -8,3 +8,6 @@ frontend-build/
 !jest.config.js
 !jest.transformer.js
 !jest.setup.js
+!crypto.js
+!formidable.js
+!uuid.js
