@@ -7,3 +7,4 @@ frontend-build/
 !/scripts/**/*
 !jest.config.js
 !jest.transformer.js
+!jest.setup.js
