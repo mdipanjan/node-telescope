@@ -5,3 +5,5 @@ dist/
 frontend-build/
 # Don't ignore any files in the scripts directory
 !/scripts/**/*
+!jest.config.js
+!jest.transformer.js
