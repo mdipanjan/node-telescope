@@ -95,7 +95,7 @@ jobs:
           npx tsc --noEmit
 
       - name: Run tests with increased verbosity
-        run: npm test -- --verbose --no-cache
+        run: npm test -- --verbose
 
       - name: Run npm audit in root
         run: npm audit
