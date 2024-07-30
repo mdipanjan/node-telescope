@@ -23,8 +23,6 @@ export function serveFrontend(app: express.Application, routePrefix: string) {
       res.sendFile(path.join(frontendPath, 'index.html'));
     });
   } else {
-    console.error(
-      `[serveFrontend] Frontend build not found at ${frontendPath}. Dashboard will not be available.`,
-    );
+    console.error(`[serveFrontend] Frontend build not found. Dashboard will not be available.`);
   }
 }

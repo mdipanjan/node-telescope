@@ -22,16 +22,16 @@ export function telescopeMiddleware(telescope: Telescope) {
       res.write = function (
         this: Response,
         chunk: Buffer,
-        encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
-        cb?: (error: Error | null) => void,
+        encodingOrCallback?: BufferEncoding | ((error: Error | null | undefined) => void),
+        cb?: (error: Error | null | undefined) => void,
       ): boolean {
         chunks.push(Buffer.from(chunk));
-        return originalWrite.call(this, chunk, encodingOrCallback as BufferEncoding, cb as any);
+        return originalWrite.call(this, chunk, encodingOrCallback as BufferEncoding, cb);
       };
 
       res.end = function (
         this: Response,
-        chunk?: any,
+        chunk?: string | Buffer | Uint8Array,
         encodingOrCallback?: BufferEncoding | ((error: Error | null) => void),
         cb?: () => void,
       ): Response {
@@ -85,8 +85,8 @@ export function telescopeMiddleware(telescope: Telescope) {
           telescope.storage.storeEntry(entry);
         }
 
-        return originalEnd.call(this, chunk, encodingOrCallback as any, cb);
-      };
+        return originalEnd.call(this, chunk, encodingOrCallback as BufferEncoding, cb);
+      } as Response['end'];
 
       next();
     });
