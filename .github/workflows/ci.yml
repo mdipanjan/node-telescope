@@ -24,15 +24,50 @@ jobs:
         node-version: [18.x, 20.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       - name: Install root dependencies
         run: npm ci
+
       - name: Bootstrap packages
         run: npm run bootstrap
+
+      - name: Debug information
+        run: |
+          echo "Node version:"
+          node --version
+          echo "NPM version:"
+          npm --version
+          echo "TypeScript version:"
+          npx tsc --version
+          echo "Jest version:"
+          npx jest --version
+          echo "Babel version:"
+          npx babel --version
+
+      - name: List installed packages
+        run: |
+          npm list --depth=0
+          cd packages/node-telescope
+          npm list --depth=0
+
       - name: Check crucial files
         run: |
           if [ ! -f packages/node-telescope-frontend/public/index.html ]; then
@@ -43,14 +78,28 @@ jobs:
             echo "logo.svg is missing in frontend public directory"
             exit 1
           fi
+
+      - name: Show test file content
+        run: |
+          cat packages/node-telescope/test/core/serve-frontend.test.ts
+
       - name: Build packages
         run: npm run build
+
       - name: Lint packages
         run: npm run lint
-      - name: Run tests
-        run: npm test
+
+      - name: Run TypeScript compiler
+        run: |
+          cd packages/node-telescope
+          npx tsc --noEmit
+
+      - name: Run tests with increased verbosity
+        run: npm test -- --verbose --no-cache
+
       - name: Run npm audit in root
         run: npm audit
+
       - name: Run npm audit in node-telescope package
         run: |
           cd packages/node-telescope
@@ -59,13 +108,13 @@ jobs:
   security-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '18.x'
       - name: Run npm audit in node-telescope package
         run: |
           cd packages/node-telescope
-          npm install
+          npm ci
           npm audit --production

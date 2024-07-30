@@ -16,7 +16,7 @@
     "build:frontend": "cd ../node-telescope-frontend && npm run build && cross-env-shell \"bash ../node-telescope/scripts/copy-frontend.sh\"",
     "watch": "npm run clean && tsc --watch",
     "dev": "npm run watch",
-    "test": "jest",
+    "test": "jest --config jest.config.js",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -63,7 +63,8 @@
   "devDependencies": {
     "@babel/core": "^7.14.0",
     "@babel/plugin-transform-modules-commonjs": "^7.14.0",
-    "@babel/preset-env": "^7.14.0",
+    "@babel/preset-env": "^7.25.2",
+    "@babel/preset-typescript": "^7.24.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.11",
     "@types/fs-extra": "^11.0.4",
