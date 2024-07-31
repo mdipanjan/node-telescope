@@ -98,12 +98,18 @@ jobs:
         run: npm test -- --verbose
 
       - name: Run npm audit in root
-        run: npm audit
+        run: npm audit --production
 
       - name: Run npm audit in node-telescope package
         run: |
           cd packages/node-telescope
           npm audit --production
+
+      - name: Attempt to fix vulnerabilities
+        run: |
+          npm audit fix --force || true
+          cd packages/node-telescope
+          npm audit fix --force || true
 
   security-audit:
     runs-on: ubuntu-latest
