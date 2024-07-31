@@ -2,8 +2,8 @@ import React from 'react';
 import { Card, Descriptions, Typography, Collapse, Tag } from 'antd';
 import { ClockCircleOutlined, BugOutlined, FileOutlined } from '@ant-design/icons';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
-import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import js from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
+import { vs2015 } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import { grey } from '@ant-design/colors';
 
 const { Title, Text, Paragraph } = Typography;
@@ -74,18 +74,19 @@ const CodeEditorStyle: React.FC<{
 
 const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) => {
   const renderCodeContext = () => {
-    if (!exception.context) return null;
+    if (!exception?.exception?.context) return null;
 
-    const lineNumbers = Object.keys(exception.context).map(Number);
+    const lineNumbers = Object.keys(exception?.exception?.context).map(Number);
     const startLine = Math.min(...lineNumbers);
-    const code = Object.entries(exception.context)
+    const code = Object.entries(exception?.exception?.context)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
       .map(([_, line]) => line)
       .join('\n');
 
-    return <CodeEditorStyle code={code} errorLine={exception.line} startLine={startLine} />;
+    return (
+      <CodeEditorStyle code={code} errorLine={exception?.exception?.line} startLine={startLine} />
+    );
   };
-
   return (
     <div>
       <Title level={3}>Exception Details</Title>
@@ -97,21 +98,21 @@ const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) 
             <ClockCircleOutlined /> {new Date(exception.timestamp).toLocaleString()}
           </Descriptions.Item>
           <Descriptions.Item label="Type">
-            <BugOutlined /> {exception.type}
+            <BugOutlined /> {exception?.exception?.type}
           </Descriptions.Item>
-          <Descriptions.Item label="Class">{exception.class}</Descriptions.Item>
+          <Descriptions.Item label="Class">{exception?.exception?.class}</Descriptions.Item>
         </Descriptions>
       </Card>
 
       <Card style={{ marginTop: 16 }}>
         <Title level={4}>Exception Message</Title>
         <Paragraph>
-          <Text strong>{exception.message}</Text>
+          <Text strong>{exception?.exception?.message}</Text>
         </Paragraph>
-        {exception.file && (
+        {exception?.exception?.file && (
           <Paragraph>
-            <FileOutlined /> {exception.file}
-            {exception.line && (
+            <FileOutlined /> {exception.exception.file}
+            {exception?.exception?.line && (
               <Tag color="red" style={{ marginLeft: 8 }}>
                 Line {exception.line}
               </Tag>
@@ -120,7 +121,7 @@ const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) 
         )}
       </Card>
 
-      {exception.context && (
+      {exception?.exception?.context && (
         <Card style={{ marginTop: 16 }}>
           <Title level={4}>Code Context</Title>
           {renderCodeContext()}
@@ -130,7 +131,7 @@ const ExceptionDetailsComponent: React.FC<{ exception: any }> = ({ exception }) 
       <Collapse style={{ marginTop: 16 }}>
         <Panel header="Stack Trace" key="1">
           <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-            {exception.stack}
+            {exception?.exception?.stack}
           </pre>
         </Panel>
       </Collapse>

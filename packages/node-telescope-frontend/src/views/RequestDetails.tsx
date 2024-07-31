@@ -28,12 +28,12 @@ import {
   CloudDownloadOutlined,
 } from '@ant-design/icons';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useParams } from 'react-router-dom';
 import { formatBody } from '../utility/utility';
 import { RequestsProps } from '../types/GeneralTypes';
 import useEntryDetails from '../hooks/useEntryDetails';
-import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { vs2015 } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;

@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Table, Tag, Space, Button, Drawer, Typography, Descriptions } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
-import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
 import { useNavigate } from 'react-router-dom';
 import { useRoutePrefix } from '../context/RoutePrefixContext';
+import json from 'react-syntax-highlighter/dist/cjs/languages/hljs/json';
+import vs2015 from 'react-syntax-highlighter/dist/cjs/styles/hljs/vs2015';
 
 SyntaxHighlighter.registerLanguage('json', json);
 

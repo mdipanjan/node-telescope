@@ -24,3 +24,7 @@ yarn-error.log*
 
 # Don't ignore any files in the scripts directory
 !/scripts/**/*
+
+!eslintrc.js
+!jest.config.js
+!tsconfig.json

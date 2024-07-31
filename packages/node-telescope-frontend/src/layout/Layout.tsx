@@ -22,6 +22,24 @@ const LayoutComponent = () => {
 
   const [selectedMenu, setSelectedMenu] = useState('/requests');
 
+  const menuItems = [
+    {
+      key: '/requests',
+      icon: <DatabaseOutlined />,
+      label: <Link to={`${routePrefix}/requests`}>Requests</Link>,
+    },
+    {
+      key: '/exceptions',
+      icon: <CodeOutlined />,
+      label: <Link to={`${routePrefix}/exceptions`}>Exceptions</Link>,
+    },
+    {
+      key: '/queries',
+      icon: <ClockCircleOutlined />,
+      label: <Link to={`${routePrefix}/queries`}>Queries</Link>,
+    },
+  ];
+
   return (
     <Flex gap="middle" wrap>
       <Layout style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}>
@@ -44,30 +62,9 @@ const LayoutComponent = () => {
             theme={isDarkMode ? 'dark' : 'light'}
             mode="inline"
             defaultSelectedKeys={[selectedMenu]}
-          >
-            <Menu.Item
-              key="/requests"
-              icon={<DatabaseOutlined />}
-              onClick={() => setSelectedMenu('requests')}
-            >
-              <Link to={`${routePrefix}/requests`}>Requests</Link>
-            </Menu.Item>
-
-            <Menu.Item
-              key="/exceptions"
-              icon={<CodeOutlined />}
-              onClick={() => setSelectedMenu('exceptions')}
-            >
-              <Link to={`${routePrefix}/exceptions`}>Exceptions</Link>
-            </Menu.Item>
-            <Menu.Item
-              key="/queries"
-              icon={<ClockCircleOutlined />}
-              onClick={() => setSelectedMenu('schedule')}
-            >
-              <Link to={`${routePrefix}/queries`}>Queries</Link>
-            </Menu.Item>
-          </Menu>
+            items={menuItems}
+            onClick={({ key }) => setSelectedMenu(key)}
+          />
         </Sider>
         <Layout
           style={{
@@ -125,4 +122,5 @@ const LayoutComponent = () => {
     </Flex>
   );
 };
+
 export default LayoutComponent;
