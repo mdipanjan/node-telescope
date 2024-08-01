@@ -23,10 +23,7 @@ function App() {
             <ThemeProvider isDarkMode={isDarkMode} toggleTheme={toggleTheme}>
               <ConfigProvider
                 theme={{
-                  algorithm: [
-                    // theme.compactAlgorithm,
-                    ...(isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm]),
-                  ],
+                  algorithm: [...(isDarkMode ? [theme.darkAlgorithm] : [theme.defaultAlgorithm])],
                   token: {
                     colorPrimary: '#289976',
                     colorBgContainer: isDarkMode ? '#141414' : '#ffffff',
