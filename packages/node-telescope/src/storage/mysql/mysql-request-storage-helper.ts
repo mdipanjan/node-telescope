@@ -43,23 +43,25 @@ export class RequestStorage {
     const [rows] = await connection.query<RowDataPacket[]>('SELECT * FROM requests WHERE id = ?', [
       id,
     ]);
+
     if (rows.length === 0) {
-      throw new Error(`Request entry not found for id: ${id}`);
+      throw new Error(`No request entry found for id: ${id}`);
     }
+
     const request = rows[0];
     return {
       ...baseEntry,
       request: {
         method: request.method,
         url: request.url,
-        headers: JSON.parse(request.headers),
+        headers: this.parseJSON(request.headers),
         ip: request.ip,
         requestId: request.request_id,
-        body: JSON.parse(request.body),
+        body: this.parseJSON(request.body),
       },
       response: {
         statusCode: request.response_status_code,
-        headers: JSON.parse(request.response_headers),
+        headers: this.parseJSON(request.response_headers),
         body: request.response_body,
       },
       curlCommand: request.curl_command,
@@ -70,5 +72,17 @@ export class RequestStorage {
       },
       duration: request.duration,
     };
+  }
+
+  private static parseJSON(data: any): any {
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        return {};
+      }
+    }
+    return data;
   }
 }

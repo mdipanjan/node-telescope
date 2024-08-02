@@ -5,6 +5,7 @@ import { MongoStorage } from './src/storage/mongo/mongo-storage';
 import { logger } from './src/utils/logger';
 import { EntryType, TelescopeDatabaseType } from './src/types';
 import { PostgreSQLStorage } from './src/storage/pg/pg-storage';
+import { MySQLStorage } from './src/storage/mysql/mysql-storage';
 // Re-export types
 export type { TelescopeOptions } from './src/core/telescope-options';
 export type { Request, Response } from 'express';
@@ -27,6 +28,7 @@ export {
   EntryType,
   TelescopeDatabaseType,
   PostgreSQLStorage,
+  MySQLStorage,
 };
 
 console.log('node-telescope module exports have been set up');

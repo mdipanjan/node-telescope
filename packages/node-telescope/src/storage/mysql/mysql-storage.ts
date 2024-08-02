@@ -19,6 +19,7 @@ import { buildMySQLWhereClause, executeMySQLTransaction } from '../../utils/db-m
 
 export class MySQLStorage extends EventEmitter implements StorageInterface {
   private pool: Pool;
+
   constructor(options: { connection: PoolOptions | Pool }) {
     super();
     if (this.isPool(options.connection)) {
@@ -34,11 +35,15 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
 
   async connect(): Promise<void> {
     try {
+      logger.info('Attempting to connect to MySQL...');
       await this.pool.query('SELECT 1');
-      logger.info('Connected to MySQL');
+      logger.info('Connected to MySQL successfully');
+
+      logger.info('Attempting to create tables...');
       await this.createTables();
+      logger.info('Tables created successfully');
     } catch (error) {
-      logger.error('Failed to connect to MySQL:', error);
+      logger.error('Failed during MySQL connection or table creation:', error);
       throw error;
     }
   }
@@ -47,8 +52,16 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
     const connection = await this.pool.getConnection();
     try {
       await executeMySQLTransaction(connection, async conn => {
-        await conn.query(createTablesQuery);
+        const queries = createTablesQuery.split(';').filter(query => query.trim() !== '');
+        for (const query of queries) {
+          logger.info(`Executing query: ${query}`);
+          await conn.query(query);
+          logger.info('Query executed successfully');
+        }
       });
+    } catch (error) {
+      logger.error('Failed to create tables:', error);
+      throw error;
     } finally {
       connection.release();
     }
@@ -99,18 +112,27 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
       }
 
       const entry = rows[0] as Entry;
-      let detailedEntry;
+      let detailedEntry: Entry | null = null;
 
-      switch (entry.type) {
-        case EntryType.REQUESTS:
-          detailedEntry = await RequestStorage.getEntry(connection, id, entry as RequestEntry);
-          break;
-        case EntryType.EXCEPTIONS:
-          detailedEntry = await ExceptionStorage.getEntry(connection, id, entry as ExceptionEntry);
-          break;
-        case EntryType.QUERIES:
-          detailedEntry = await QueryStorage.getEntry(connection, id, entry as QueryEntry);
-          break;
+      try {
+        switch (entry.type) {
+          case EntryType.REQUESTS:
+            detailedEntry = await RequestStorage.getEntry(connection, id, entry as RequestEntry);
+            break;
+          case EntryType.EXCEPTIONS:
+            detailedEntry = await ExceptionStorage.getEntry(
+              connection,
+              id,
+              entry as ExceptionEntry,
+            );
+            break;
+          case EntryType.QUERIES:
+            detailedEntry = await QueryStorage.getEntry(connection, id, entry as QueryEntry);
+            break;
+        }
+      } catch (error) {
+        logger.error(`Failed to get detailed entry for id ${id}:`, error);
+        return entry; // Return basic entry if detailed retrieval fails
       }
 
       return detailedEntry || entry;
@@ -149,14 +171,24 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
       queryParams.push(perPage, offset);
 
       const [rows] = await connection.query<RowDataPacket[]>(query, queryParams);
-      const entries = await Promise.all(rows.map(row => this.getEntry(row.id)));
+      const entries = await Promise.all(
+        rows.map(async row => {
+          try {
+            const entry = await this.getEntry(row.id);
+            return entry || (row as Entry);
+          } catch (error) {
+            logger.error(`Failed to get detailed entry for id ${row.id}:`, error);
+            return row as Entry;
+          }
+        }),
+      );
 
       const countQuery = `SELECT COUNT(*) as count FROM entries${whereClause}`;
       const [countResult] = await connection.query<RowDataPacket[]>(
         countQuery,
         queryParams.slice(0, -2),
       );
-      const total = countResult[0].count as number;
+      const total = (countResult[0] as RowDataPacket).count as number;
 
       return {
         entries: entries.filter((entry): entry is Entry => entry !== null),
@@ -188,7 +220,7 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
       query += ' ORDER BY timestamp DESC LIMIT ?';
       queryParams.push(limit);
 
-      const [rows] = await this.pool.query(query, queryParams);
+      const [rows] = await this.pool.query<RowDataPacket[]>(query, queryParams);
       return rows as Entry[];
     } catch (error) {
       logger.error('Failed to get recent entries:', error);
