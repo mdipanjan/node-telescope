@@ -3,11 +3,10 @@ import { TelescopeOptions } from '../telescope-options';
 import { sanitizeCodeSnippet } from '../../utils/utility';
 import { logger } from '../../utils/logger';
 
-export function shouldReadFile(options: TelescopeOptions): boolean | undefined {
+export function shouldReadFile(options: Partial<TelescopeOptions>): boolean | undefined {
   return (
     options.enableFileReading &&
-    options.fileReadingEnvironments &&
-    options.fileReadingEnvironments.includes(process.env.NODE_ENV || 'development')
+    options?.fileReadingEnvironments?.includes(process.env.NODE_ENV ?? 'development')
   );
 }
 
@@ -19,7 +18,7 @@ export function sanitizeFilePath(filePath: string): string {
 }
 
 export function getFileContext(
-  options: TelescopeOptions,
+  options: Partial<TelescopeOptions>,
   filePath?: string,
   lineNumber?: number,
 ): { [key: string]: string } | undefined {
