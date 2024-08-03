@@ -100,6 +100,8 @@ graph TD
 5. **Examples**:
    - Class-Based Example: Demonstrates how to use the library with MongoDB.
    - PostgreSQL Example: Shows integration with PostgreSQL database.
+   - MySQL Example: Shows integration with MySQL database.
+   - Production Test Example: Shows integration with MongoDB database and mimics a production environment.
 6. **Frontend Application**:
    - React Components: UI elements for data visualization.
    - State Management: Handles application state.

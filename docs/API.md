@@ -85,6 +85,7 @@ Enum for supported database types.
 enum TelescopeDatabaseType {
 	MONGO = 'mongo',
 	POSTGRES = 'postgres',
+	MYSQL = 'mysql',
 }
 ```
 

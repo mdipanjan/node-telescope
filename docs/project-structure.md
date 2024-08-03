@@ -22,7 +22,9 @@ node-telescope/
 │   │   │   │   ├── mongo/
 │   │   │   │   │   └── mongo-storage.ts
 │   │   │   │   └── pg/
-│   │   │   │       └── pg-storage.ts
+│   │   │   │   │    └── pg-storage.ts
+│   │   │   │   └── mysql/
+│   │   │   │   │    └── mysql-storage.ts
 │   │   │   ├── utils/
 │   │   │   │   ├── logger.ts
 │   │   │   │   └── async-context.ts
@@ -83,6 +85,8 @@ node-telescope/
   - `/examples`: Example projects demonstrating library usage
     - `/class-based`: A MongoDB-based implementation example
     - `/class-based-pg`: A PostgreSQL-based implementation example
+    - `/mysql-example`: A MySQL-based implementation example
+    - `/prod-test`: A MongoDB-based implementation example which mimics a production environment
 - `lerna.json`: Lerna configuration for managing the monorepo
 - `package.json`: Root package configuration
 
@@ -90,4 +94,4 @@ node-telescope/
 
 - Each package has its own `package.json` and `tsconfig.json` for package-specific configurations.
 - The `node-telescope-frontend` package provides a user interface for viewing and analyzing the data collected by the `node-telescope` library.
-- The examples demonstrate integration with different database systems (MongoDB and PostgreSQL).
+- The examples demonstrate integration with different database systems (MongoDB PostgreSQL and MySQL).
