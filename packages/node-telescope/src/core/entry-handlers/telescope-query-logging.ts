@@ -5,6 +5,8 @@ import { PostgreSQLStorage } from '../../storage/pg/pg-storage';
 import { setupMongoQueryLogging } from './telescope-mongo-query-logging';
 import { setupPostgresQueryLogging } from './telescope-postgres-query-logging';
 import { getRequestId } from '../../utils/async-context';
+import { MySQLStorage } from '../../storage/mysql/mysql-storage';
+import { setupMySQLQueryLogging } from './telescope-mysql-query-logging';
 
 export function setupQueryLogging(telescope: Telescope): void {
   if (
@@ -15,6 +17,8 @@ export function setupQueryLogging(telescope: Telescope): void {
       setupMongoQueryLogging(telescope);
     } else if (telescope.storage instanceof PostgreSQLStorage) {
       setupPostgresQueryLogging(telescope);
+    } else if (telescope.storage instanceof MySQLStorage) {
+      setupMySQLQueryLogging(telescope);
     } else {
       console.warn('Unsupported storage type for query logging');
     }
@@ -39,6 +43,10 @@ export function logQuery(
     collection = match ? match[1] : 'unknown';
   } else if (telescope.storage instanceof PostgreSQLStorage) {
     // For PostgreSQL, try to extract table name from the query
+    const match = queryText.match(/FROM\s+(\w+)/i);
+    collection = match ? match[1] : 'unknown';
+  } else if (telescope.storage instanceof MySQLStorage) {
+    // For MySQL, try to extract table name from the query
     const match = queryText.match(/FROM\s+(\w+)/i);
     collection = match ? match[1] : 'unknown';
   }

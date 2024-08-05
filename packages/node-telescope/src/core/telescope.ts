@@ -80,7 +80,10 @@ export class Telescope {
   }
 
   private initialize(): void {
-    if (this.options.databaseType === TelescopeDatabaseType.POSTGRES) {
+    if (
+      this.options.databaseType === TelescopeDatabaseType.POSTGRES ||
+      this.options.databaseType === TelescopeDatabaseType.MYSQL
+    ) {
       this.connect();
     }
     if (this.options.enableQueryLogging) {

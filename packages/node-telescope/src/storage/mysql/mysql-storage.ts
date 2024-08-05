@@ -29,6 +29,15 @@ export class MySQLStorage extends EventEmitter implements StorageInterface {
     }
   }
 
+  getPool(): any | null {
+    return this.pool || null;
+  }
+
+  setPool(pool: Pool): void {
+    this.pool = pool;
+    logger.info('Pool updated in MySQLStorage');
+  }
+
   private isPool(connection: PoolOptions | Pool): connection is Pool {
     return (connection as Pool).getConnection !== undefined;
   }

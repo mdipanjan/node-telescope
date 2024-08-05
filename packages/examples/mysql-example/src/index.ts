@@ -31,10 +31,21 @@ async function createTestServer() {
 		console.log('Connecting to MySQL and creating tables...');
 		await storage.connect();
 		console.log('MySQL connection and table creation successful');
+
+		// Create users table if it doesn't exist
+		await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE
+      )
+    `);
+		console.log('Users table created or already exists');
 	} catch (error) {
 		console.error('Failed to connect to MySQL or create tables:', error);
 		process.exit(1);
 	}
+
 	const telescope = new Telescope({
 		storage: storage,
 		watchedEntries: [EntryType.REQUESTS, EntryType.EXCEPTIONS, EntryType.QUERIES],
@@ -56,6 +67,58 @@ async function createTestServer() {
 		res.json({ message: 'This is a test GET route' });
 	});
 
+	// Database-related routes
+	app.post('/users', async (req: Request, res: Response) => {
+		const { name, email } = req.body;
+		try {
+			const [result] = await pool.query('INSERT INTO users (name, email) VALUES (?, ?)', [
+				name,
+				email,
+			]);
+			res.status(201).json({ message: 'User created', id: (result as any).insertId });
+		} catch (error) {
+			console.error('Error creating user:', error);
+			res.status(500).json({ error: 'Failed to create user' });
+		}
+	});
+
+	app.get('/users', async (_req: Request, res: Response) => {
+		try {
+			const [rows] = await pool.query('SELECT * FROM users');
+			res.json(rows);
+		} catch (error) {
+			console.error('Error fetching users:', error);
+			res.status(500).json({ error: 'Failed to fetch users' });
+		}
+	});
+
+	app.get('/users/:id', async (req: Request, res: Response) => {
+		const { id } = req.params;
+		try {
+			const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+			if ((rows as any[]).length === 0) {
+				res.status(404).json({ error: 'User not found' });
+			} else {
+				res.json((rows as any[])[0]);
+			}
+		} catch (error) {
+			console.error('Error fetching user:', error);
+			res.status(500).json({ error: 'Failed to fetch user' });
+		}
+	});
+
+	app.put('/users/:id', async (req: Request, res: Response) => {
+		const { id } = req.params;
+		const { name, email } = req.body;
+		try {
+			await pool.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+			res.json({ message: 'User updated' });
+		} catch (error) {
+			console.error('Error updating user:', error);
+			res.status(500).json({ error: 'Failed to update user' });
+		}
+	});
+
 	app.get('/error', (_req: Request, _res: Response) => {
 		throw new Error('This is a test error');
 	});
@@ -67,6 +130,7 @@ async function createTestServer() {
 			res.status(500).send('Something broke!');
 		},
 	);
+
 	function start() {
 		const PORT = process.env.PORT || 4000;
 		server.listen(PORT, () => {

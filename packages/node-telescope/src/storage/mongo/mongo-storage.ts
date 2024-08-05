@@ -178,7 +178,6 @@ export class MongoStorage extends EventEmitter implements StorageInterface {
     }
   }
 
-  // this could be used when user comes to request for recent entries
   async getRecentEntries(limit: number, type?: EntryType): Promise<Entry[]> {
     try {
       const query = type ? { type } : { type: EntryType.REQUESTS };
