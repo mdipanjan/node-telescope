@@ -1,6 +1,6 @@
 # Node Telescope
 
-[![npm version](https://badge.fury.io/js/node-telescope.svg)](https://badge.fury.io/js/node-telescope)
+[![npm version](https://img.shields.io/npm/v/node-telescope.svg)](https://www.npmjs.com/package/node-telescope)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Node Telescope is a comprehensive logging and monitoring solution for Node.js applications. It provides real-time insights into your application's performance, errors, and database queries, with support for both MongoDB and PostgreSQL.

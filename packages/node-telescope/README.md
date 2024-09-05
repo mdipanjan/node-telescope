@@ -1,4 +1,4 @@
-# Node Telescope Core
+# Node Telescope
 
 This package contains the core functionality of Node Telescope, a powerful logging and monitoring library for Node.js applications.
 
@@ -44,16 +44,16 @@ server.listen(3000);
 
 ## Testing
 
-For information on how to test the node-telescope package in a production-like environment, please see our [Production Test Guide](../../docs/PROD_TEST_GUIDE.md). Make sure to set up the required environment variables as described in the guide before running the prod-test.
+For information on how to test the node-telescope package in a production-like environment, please see our [Production Test Guide](https://github.com/mdipanjan/node-telescope/blob/main/docs/PROD_TEST_GUIDE.md). Make sure to set up the required environment variables as described in the guide before running the prod-test.
 
 ## API Documentation
 
-For detailed API documentation, please refer to the [API Reference](../../docs/API.md).
+For detailed API documentation, please refer to the [API Reference](https://github.com/mdipanjan/node-telescope/blob/main/docs/API.md).
 
 ## Contributing
 
-We welcome contributions! Please see the [Contributing Guide](../../CONTRIBUTING.md) in the root of the monorepo for more details.
+We welcome contributions! Please see the [Contributing Guide](https://github.com/mdipanjan/node-telescope/blob/main/CONTRIBUTING.md) in the root of the monorepo for more details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file in the root of the monorepo for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/mdipanjan/node-telescope/blob/main/LICENSE) file in the root of the monorepo for details.
